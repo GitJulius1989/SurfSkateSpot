@@ -1,11 +1,11 @@
-package com.bioridelabs.surfskatespot.viewmodel
+package com.bioridelabs.surfskatespot.presentation.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bioridelabs.surfskatespot.model.Spot
-import com.bioridelabs.surfskatespot.repository.SpotRepository
+import com.bioridelabs.surfskatespot.domain.model.Spot
+import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {

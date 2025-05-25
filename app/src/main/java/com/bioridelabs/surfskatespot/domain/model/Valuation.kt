@@ -1,4 +1,4 @@
-package com.bioridelabs.surfskatespot.model
+package com.bioridelabs.surfskatespot.domain.model
 
 data class Valuation(
 

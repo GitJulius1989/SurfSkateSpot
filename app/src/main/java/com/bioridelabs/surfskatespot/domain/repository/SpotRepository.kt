@@ -1,6 +1,6 @@
-package com.bioridelabs.surfskatespot.repository
+package com.bioridelabs.surfskatespot.domain.repository
 
-import com.bioridelabs.surfskatespot.model.Spot
+import com.bioridelabs.surfskatespot.domain.model.Spot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.tasks.await

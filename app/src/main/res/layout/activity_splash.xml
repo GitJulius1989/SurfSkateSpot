@@ -4,12 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/tu_color_principal_app">
+    android:background= "@color/black">
 
     <ImageView
         android:id="@+id/imageViewLogo"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:src="@drawable/logo_neutro"/>
+        android:src="@drawable/ic_launcher_foreground"/>
 </LinearLayout>
-et.ConstraintLayout>

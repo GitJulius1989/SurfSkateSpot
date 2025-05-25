@@ -1,10 +1,10 @@
-package com.bioridelabs.surfskatespot.view.adapter
+package com.bioridelabs.surfskatespot.presentation.view.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bioridelabs.surfskatespot.databinding.ItemSpotBinding
-import com.bioridelabs.surfskatespot.model.Spot
+import com.bioridelabs.surfskatespot.domain.model.Spot
 
 class SpotAdapter(
     private var spots: List<Spot>,

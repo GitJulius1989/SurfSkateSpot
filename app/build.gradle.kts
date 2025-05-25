@@ -1,8 +1,18 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    // 1) Android + Kotlin
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+
+    // 2) KAPT (para Hilt y cualquier otro annotation processor)
+    id("org.jetbrains.kotlin.kapt")
+
+    // 3) Hilt
+    id("dagger.hilt.android.plugin")
+
+    // 4) Google Services (Firebase)
     id("com.google.gms.google-services")
 }
+
 
 android {
     namespace = "com.bioridelabs.surfskatespot"
@@ -40,32 +50,43 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0") // estable con API 35
+    // AndroidX & Material
+    implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.activity:activity-ktx:1.8.2")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Lifecycle & Navigation
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-
-    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-analytics-ktx")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
-
-    // Navigation Component actualizado
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
 
-    // Dependencia Volley (para resolver el error de Volley)
-    implementation("com.android.volley:volley:1.2.1")
-    implementation(libs.play.services.location)
+    // Firebase (Auth, Firestore, Storage, Analytics)
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
+    // Google Sign-In (necesario para el botón y la lógica de inicio de sesión con Google)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // Coroutines + Play Services
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Volley (si lo necesitas)
+    implementation("com.android.volley:volley:1.2.1")
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-compiler:2.44")
+
+    // Test
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
 }

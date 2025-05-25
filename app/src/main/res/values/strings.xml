@@ -12,4 +12,12 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="google_maps_key">AIzaSyCwnKUTZM-iGUeZtMRYttp5qK-oEpYdt3U</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="password">Contraseña</string>
+    <string name="sign_up_user">Registrar usuario</string>
+    <string name="email">Email</string>
+    <string name="name">Nombre</string>
+    <string name="login_tittle">SurfSkateSpot</string>
+    <string name="login_separator">O</string>
+    <string name="default_web_client_id">606678551960-8a5hts74gfn1fbuag7mntp6g494d9viq.apps.googleusercontent.com</string>
 </resources>
