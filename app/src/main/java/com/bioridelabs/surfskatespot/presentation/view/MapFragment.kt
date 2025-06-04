@@ -42,7 +42,7 @@ class MapFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        layerToggleButton = view.findViewById(R.id.layerToggleButton)
+        layerToggleButton = view.findViewById(R.id.mapTypeFab)
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as SupportMapFragment
         mapFragment.getMapAsync { googleMap ->
