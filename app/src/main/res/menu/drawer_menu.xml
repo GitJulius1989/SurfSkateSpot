@@ -3,17 +3,13 @@
     tools:showIn="navigation_view">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_account_user"
-            android:title="@string/perfil" />
+            android:id="@+id/profileFragment"
+            android:title="Mi Perfil" />
         <item
-            android:id="@+id/nav_about_us"
-            android:icon="@drawable/ic_about_us"
-            android:title="@string/sobre_nosotros" />
+            android:id="@+id/addSpotFragment"
+            android:title="Añadir Spot" />
+        <item
+            android:id="@+id/aboutUsFragment"
+            android:title="Sobre Nosotros" />
     </group>
-
-    <item
-        android:id="@+id/nav_logout"
-        android:icon="@drawable/ic_exit"
-        android:title="@string/cerrar_sesi_n" />
 </menu>

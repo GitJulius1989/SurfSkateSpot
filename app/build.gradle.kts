@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.google.services)
+    id("androidx.navigation.safeargs.kotlin")
+
 }
 
 android {

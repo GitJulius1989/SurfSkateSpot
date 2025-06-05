@@ -34,6 +34,32 @@
         android:label="AboutUsFragment"
         tools:layout="@layout/fragment_about_us" />
 
+
+    <fragment
+        android:id="@+id/spotListFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.SpotListFragment"
+        android:label="Lista de Spots"
+        tools:layout="@layout/fragment_spot_list">
+        <action
+            android:id="@+id/action_spotListFragment_to_spotDetailFragment"
+            app:destination="@id/spotDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/spotDetailFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.SpotDetailFragment"
+        android:label="Detalles del Spot"
+        tools:layout="@layout/fragment_spot_detail">
+        <argument
+            android:name="spotId"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_mapFragment_to_spotListFragment"
+        app:destination="@id/spotListFragment" />
+
     <action
         android:id="@+id/action_global_loginFragment"
         app:destination="@id/loginFragment"

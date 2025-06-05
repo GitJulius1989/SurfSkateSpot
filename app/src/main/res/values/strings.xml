@@ -23,4 +23,5 @@
     <string name="perfil">Perfil</string>
     <string name="sobre_nosotros">Sobre Nosotros</string>
     <string name="cerrar_sesi_n">Cerrar Sesión</string>
+    <string name="no_hay_spots_disponibles_por_el_momento">No hay spots disponibles por el momento.</string>
 </resources>

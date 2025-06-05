@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.bioridelabs.surfskatespot.R
 import com.bioridelabs.surfskatespot.presentation.viewmodel.MainViewModel
@@ -22,10 +23,12 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MapFragment : Fragment() {
 
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var map: GoogleMap? = null
     private lateinit var layerToggleButton: FloatingActionButton

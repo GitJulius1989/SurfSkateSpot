@@ -1,9 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.SurfSkateSpot" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorError">@color/red_500</item> <item name="colorOnError">@color/white</item>
     </style>
 
     <style name="Theme.SurfSkateSpot" parent="Base.Theme.SurfSkateSpot" />
+
+    <style name="Widget.Material3.Button.OutlinedButton.Danger" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">?attr/colorError</item>
+        <item name="strokeColor">?attr/colorError</item>
+    </style>
 </resources>
