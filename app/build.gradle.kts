@@ -1,18 +1,12 @@
 plugins {
-    // 1) Android + Kotlin
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.dagger.hilt.android)
+    alias(libs.plugins.google.services)
+    id("androidx.navigation.safeargs.kotlin")
 
-    // 2) KAPT (para Hilt y cualquier otro annotation processor)
-    id("org.jetbrains.kotlin.kapt")
-
-    // 3) Hilt
-    id("dagger.hilt.android.plugin")
-
-    // 4) Google Services (Firebase)
-    id("com.google.gms.google-services")
 }
-
 
 android {
     namespace = "com.bioridelabs.surfskatespot"
@@ -45,48 +39,53 @@ android {
 
     buildFeatures {
         viewBinding = true
-        dataBinding = true // añade esto obligatoriamente
+        dataBinding = true
     }
+
 }
 
 dependencies {
-    // AndroidX & Material
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    // AndroidX & Material (usando alias de libs.versions.toml)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.google.material)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.activity) // Añadido: `activity` es común y ya está en tu TOML
 
-    // Lifecycle & Navigation
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    // Lifecycle & Navigation (usando alias de libs.versions.toml)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
 
-    // Firebase (Auth, Firestore, Storage, Analytics)
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
-    implementation("com.google.firebase:firebase-analytics-ktx")
 
-    // Google Sign-In (necesario para el botón y la lógica de inicio de sesión con Google)
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    // Firebase (Auth, Firestore, Storage, Analytics) (usando alias y plataforma de libs.versions.toml)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.analytics.ktx)
 
-    // Coroutines + Play Services
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    // Google Sign-In (usando alias de libs.versions.toml)
+    implementation(libs.play.services.auth)
 
-    // Volley (si lo necesitas)
-    implementation("com.android.volley:volley:1.2.1")
+    // Coroutines + Play Services (usando alias de libs.versions.toml)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
 
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-compiler:2.44")
+    // Volley (si lo necesitas y está en libs.versions.toml)
+    implementation(libs.volley)
 
-    // Test
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    // Hilt (usando alias de libs.versions.toml)
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
 
+    // Test (usando alias de libs.versions.toml)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+
+    // Splash
+    implementation(libs.androidx.core.splashscreen)
 }

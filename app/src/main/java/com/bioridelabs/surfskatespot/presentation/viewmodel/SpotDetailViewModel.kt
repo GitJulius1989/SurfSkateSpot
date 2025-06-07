@@ -1,48 +1,50 @@
+// app/src/main/java/com/bioridelabs/surfskatespot/presentation/viewmodel/SpotDetailViewModel.kt
 package com.bioridelabs.surfskatespot.presentation.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bioridelabs.surfskatespot.domain.model.Spot
-import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
+import com.bioridelabs.surfskatespot.domain.model.Spot // Importa tu data class Spot
+import com.bioridelabs.surfskatespot.domain.repository.SpotRepository // Importa tu SpotRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SpotDetailViewModel : ViewModel() {
+@HiltViewModel
+class SpotDetailViewModel @Inject constructor(
+    private val spotRepository: SpotRepository // Inyecta tu SpotRepository
+) : ViewModel() {
 
-    private val spotRepository = SpotRepository()
+    private val _spotDetails = MutableLiveData<Spot?>()
+    val spotDetails: LiveData<Spot?> = _spotDetails
 
-    // LiveData que contiene la información del spot
-    private val _spot = MutableLiveData<Spot>()
-    val spot: LiveData<Spot> get() = _spot
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
 
-    // LiveData para indicar el estado de una operación (por ejemplo, actualización)
-    private val _updateResult = MutableLiveData<Boolean>()
-    val updateResult: LiveData<Boolean> get() = _updateResult
+    private val _errorMessage = MutableLiveData<String?>()
+    val errorMessage: LiveData<String?> = _errorMessage
 
-    /**
-     * Carga los detalles del spot dado su ID.
-     */
-    fun loadSpot(spotId: String) {
+    // Método para cargar los detalles del spot
+    fun loadSpotDetails(spotId: String) {
+        _isLoading.value = true
+        _errorMessage.value = null // Limpiar errores anteriores
         viewModelScope.launch {
-            val spotData = spotRepository.getSpot(spotId)
-            spotData?.let {
-                _spot.value = it
+            try {
+                val spot = spotRepository.getSpot(spotId) // <-- ¡CAMBIO AQUÍ! Usa tu método 'getSpot'
+                _spotDetails.value = spot
+            } catch (e: Exception) {
+                _errorMessage.value = "Error al cargar los detalles del spot: ${e.message}"
+                _spotDetails.value = null
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    /**
-     * Actualiza los datos del spot.
-     */
-    fun updateSpot(updatedSpot: Spot) {
-        viewModelScope.launch {
-            val success = spotRepository.updateSpot(updatedSpot)
-            _updateResult.value = success
-            if (success) {
-                // Actualiza el LiveData con la versión modificada del spot
-                _spot.value = updatedSpot
-            }
-        }
-    }
+    // Método para determinar si el usuario actual es el propietario del spot (requiere FirebaseAuth o AuthRepository)
+    // val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance() // Si no lo tienes inyectado con Hilt
+    // fun isCurrentUserSpotOwner(ownerId: String): Boolean {
+    //     return firebaseAuth.currentUser?.uid == ownerId
+    // }
 }
