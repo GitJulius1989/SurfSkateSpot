@@ -1,14 +1,18 @@
+// app/src/main/java/com/bioridelabs/surfskatespot/domain/repository/SpotRepository.kt
 package com.bioridelabs.surfskatespot.domain.repository
 
 import com.bioridelabs.surfskatespot.domain.model.Spot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.tasks.await
+// No necesitas import javax.inject.Inject aquí, ya que el constructor no está directamente @Inject
 
-class SpotRepository {
-    // Instancia de Firestore
-    private val firestore = FirebaseFirestore.getInstance()
-    private val spotsCollection = firestore.collection("spots")
+class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO CLAVE AQUÍ! Usa 'private val firestore: FirebaseFirestore' directamente en el constructor
+
+    // Ya no necesitas esta línea: private val firestore = FirebaseFirestore.getInstance()
+    // Porque 'firestore' ya es una propiedad del constructor y se inicializa con la que Dagger le da.
+
+    private val spotsCollection = firestore.collection("spots") // Ahora usa la instancia inyectada
 
     // Obtener todos los spots
     suspend fun getAllSpots(): List<Spot> {
@@ -77,4 +81,3 @@ class SpotRepository {
         }
     }
 }
-

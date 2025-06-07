@@ -1,12 +1,13 @@
-// build.gradle.kts (Proyecto: SurfSkateSpot)
+// build.gradle.kts (Project: SurfSkateSpot)
+
 plugins {
-    // Tus alias para los plugins de Android y Kotlin están bien si usas catálogo de versiones (libs.versions.toml)
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.kapt) apply false
+    alias(libs.plugins.dagger.hilt.android) apply false
+    alias(libs.plugins.google.services) apply false
 
-    // Plugin de Hilt - Asegúrate de que la versión sea la que quieres usar (2.44 según tu error)
-    id("com.google.dagger.hilt.android") version "2.44" apply false // <-- AÑADE ESTO
+    // ¡AÑADE ESTA LÍNEA para el plugin de Safe Args!
+    id("androidx.navigation.safeargs.kotlin") version "2.9.0" apply false
 
-    // Plugin de Google Services
-    id("com.google.gms.google-services") version "4.4.2" apply false // O la versión más reciente compatible
 }

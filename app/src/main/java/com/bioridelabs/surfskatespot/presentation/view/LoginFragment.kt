@@ -3,6 +3,7 @@ package com.bioridelabs.surfskatespot.presentation.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -88,6 +89,8 @@ class LoginFragment : Fragment() {
         // 3. Inicialización del ActivityResultLauncher para Google Sign-In
         // Este launcher manejará el resultado de la actividad de inicio de sesión de Google.
         googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            Log.d("GoogleSignIn", "Activity Result Code: ${result.resultCode}") // <--- AÑADE ESTA LÍNEA
+
             if (result.resultCode == Activity.RESULT_OK) {
                 // Si el resultado es OK, intenta obtener la cuenta de Google.
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)

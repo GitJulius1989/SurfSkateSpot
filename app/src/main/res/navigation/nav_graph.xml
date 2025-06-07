@@ -11,11 +11,6 @@
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
-            android:id="@+id/action_loginFragment_to_mainContainerFragment"
-            app:destination="@id/mainContainerFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true" />
-        <action
             android:id="@+id/action_loginFragment_to_mapFragment"
             app:destination="@id/mapFragment"
             app:popUpTo="@id/loginFragment"
@@ -27,21 +22,7 @@
         android:name="com.bioridelabs.surfskatespot.presentation.view.MapFragment"
         android:label="fragment_map"
         tools:layout="@layout/fragment_map" />
-    <fragment
-        android:id="@+id/mainContainerFragment"
-        android:name="com.bioridelabs.surfskatespot.presentation.view.MainContainerFragment"
-        android:label="MainContainerFragment"
-        tools:layout="@layout/fragment_main_container">
-        <action
-            android:id="@+id/action_mainContainerFragment_to_mapFragment"
-            app:destination="@id/mapFragment" />
-        <action
-            android:id="@+id/action_mainContainerFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
-        <action
-            android:id="@+id/action_mainContainerFragment_to_aboutUsFragment"
-            app:destination="@id/aboutUsFragment" />
-    </fragment>
+
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.bioridelabs.surfskatespot.presentation.view.UserProfileFragment"
@@ -53,10 +34,35 @@
         android:label="AboutUsFragment"
         tools:layout="@layout/fragment_about_us" />
 
+
+    <fragment
+        android:id="@+id/spotListFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.SpotListFragment"
+        android:label="Lista de Spots"
+        tools:layout="@layout/fragment_spot_list">
+        <action
+            android:id="@+id/action_spotListFragment_to_spotDetailFragment"
+            app:destination="@id/spotDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/spotDetailFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.SpotDetailFragment"
+        android:label="Detalles del Spot"
+        tools:layout="@layout/fragment_spot_detail">
+        <argument
+            android:name="spotId"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_mapFragment_to_spotListFragment"
+        app:destination="@id/spotListFragment" />
+
     <action
         android:id="@+id/action_global_loginFragment"
         app:destination="@id/loginFragment"
-        app:popUpTo="@id/mainContainerFragment"
-        app:popUpToInclusive="false" />
-
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
 </navigation>
