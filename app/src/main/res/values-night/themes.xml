@@ -1,7 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.SurfSkateSpot" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">#FFFFFF</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorSurface">#121212</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:textColorSecondary">#FFFFFF</item>
+
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.SurfSkateSpot.HeadlineMedium</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.SurfSkateSpot.BodyLarge</item>
+    </style>
+
+    <style name="Theme.SurfSkateSpot.HighContrast" parent="Base.Theme.SurfSkateSpot">
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.SurfSkateSpot.HeadlineMedium.HighContrast</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.SurfSkateSpot.BodyLarge.HighContrast</item>
     </style>
 </resources>

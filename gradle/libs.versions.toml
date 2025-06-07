@@ -15,9 +15,9 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 
 # AndroidX UI, Material Design
-appcompat = "1.7.0"
+appcompat = "1.7.1"
 material = "1.12.0"
-activity = "1.10.0" # Tu versión actual para androidx.activity
+activity = "1.10.1" # Tu versión actual para androidx.activity
 constraintlayout = "2.2.0"
 annotation = "1.9.1"
 
@@ -44,6 +44,12 @@ coroutinesPlayServices = "1.8.1" # Para kotlinx-coroutines-play-services
 
 # Volley (si lo necesitas).
 volley = "1.2.1"
+
+#Glide - imagenes
+glide = "4.16.0"
+
+# Corroutines
+kotlinx-coroutines = "1.8.1"
 
 
 [libraries]
@@ -81,6 +87,14 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 
 # Volley
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
+
+# Glide
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
+
+# Corroutines
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 
 # Hilt
 dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
