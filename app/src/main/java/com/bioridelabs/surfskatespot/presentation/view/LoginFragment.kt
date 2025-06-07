@@ -22,9 +22,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 // Fragmento para la pantalla de inicio de sesión y registro de usuarios.
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
 
     // _binding es una propiedad nullable que contiene la instancia de FragmentLoginBinding.

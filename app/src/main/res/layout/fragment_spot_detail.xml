@@ -93,6 +93,32 @@
                 tools:ignore="RtlSymmetry" />
         </LinearLayout>
 
+
+        <LinearLayout
+            android:id="@+id/llFavoriteStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/llSportTypes">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Favorito:"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/checkboxFavorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:checked="false" /> </LinearLayout>
+
         <TextView
             android:id="@+id/tvRatingLabel"
             android:layout_width="wrap_content"

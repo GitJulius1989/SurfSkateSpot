@@ -5,7 +5,8 @@ import com.bioridelabs.surfskatespot.domain.model.Spot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.tasks.await
-// No necesitas import javax.inject.Inject aquí, ya que el constructor no está directamente @Inject
+import javax.inject.Inject
+
 
 class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO CLAVE AQUÍ! Usa 'private val firestore: FirebaseFirestore' directamente en el constructor
 
@@ -78,6 +79,31 @@ class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+
+    /**
+     * Obtiene una lista de spots por sus IDs.
+     *
+     * @param spotIds Lista de IDs de los spots a buscar.
+     * @return Una lista de objetos Spot que coinciden con los IDs.
+     */
+    suspend fun getSpotsByIds(spotIds: List<String>): List<Spot> {
+        if (spotIds.isEmpty()) return emptyList()
+
+        return try {
+            val snapshot = spotsCollection.whereIn("spotId", spotIds).get().await() // Firestore solo permite hasta 10 IDs en whereIn
+            // Si esperas más de 10 IDs, deberías dividir la consulta en lotes o reevaluar la estrategia.
+            // Para un MVP, 10 es un buen punto de partida.
+            snapshot.documents.mapNotNull { doc ->
+                val spot = doc.toObject<Spot>()
+                spot?.spotId = doc.id
+                spot
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.bioridelabs.surfskatespot.databinding.FragmentSpotDetailBinding
 import com.bioridelabs.surfskatespot.presentation.viewmodel.SpotDetailViewModel
+import com.google.android.material.snackbar.Snackbar
 
 // Fragmento para mostrar los detalles de un spot específico.
 class SpotDetailFragment : Fragment() {
@@ -23,6 +24,9 @@ class SpotDetailFragment : Fragment() {
     // Para recibir los argumentos del spot (ej. el ID del spot)
     // Asegúrate de que el argumento "spotId" está definido en tu nav_graph.xml
     private val args: SpotDetailFragmentArgs by navArgs() // Descomentar esta línea
+
+    private var currentSpotId: String? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -93,6 +97,67 @@ class SpotDetailFragment : Fragment() {
         }
 
         // Aquí configurarías los listeners para los botones de acción
+        // binding.btnEditSpot.setOnClickListener { /* Navegar a la pantalla de edición */ }
+        // binding.btnDeleteSpot.setOnClickListener { /* Mostrar diálogo de confirmación y eliminar */ }
+        // binding.btnAddComment.setOnClickListener { /* Abrir diálogo para añadir comentario */ }
+        // binding.btnAddRating.setOnClickListener { /* Abrir diálogo para añadir valoración */ }
+    }
+
+    private fun observeViewModel() {
+        spotDetailViewModel.spotDetails.observe(viewLifecycleOwner) { spot ->
+            spot?.let {
+                binding.tvSpotName.text = it.nombre
+                binding.tvSpotDescription.text = it.descripcion
+
+                // Aquí iría la lógica para configurar tu ViewPager2 para las imágenes
+                // y tu RecyclerView para los comentarios, si los tienes.
+
+                // Lógica de visibilidad de botones (editar/eliminar)
+                // Implementar después de refactorizar UserRepository y obtener el UID actual.
+                // val currentUserId = firebaseAuth.currentUser?.uid // Si lo tienes directamente en el fragment
+                // if (currentUserId == it.userId) {
+                //    binding.btnEditSpot.visibility = View.VISIBLE
+                //    binding.btnDeleteSpot.visibility = View.VISIBLE
+                // } else {
+                //    binding.btnEditSpot.visibility = View.GONE
+                //    binding.btnDeleteSpot.visibility = View.GONE
+                // }
+            } ?: run {
+                Toast.makeText(context, "Spot no encontrado o error al cargar.", Toast.LENGTH_LONG).show()
+                // Puedes navegar de vuelta o mostrar un mensaje de error
+            }
+        }
+
+        // Observar el estado de favorito
+        spotDetailViewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
+            binding.checkboxFavorite.isChecked = isFavorite
+        }
+
+        // Observar errores desde el ViewModel
+        spotDetailViewModel.errorMessage.observe(viewLifecycleOwner) { message ->
+            message?.let {
+                // Uso de SnackBar para mensajes más persistentes y con opción a acción, si quieres
+                Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
+                spotDetailViewModel.clearErrorMessage() // Limpiar el error después de mostrarlo
+            }
+        }
+
+        // Observar estado de carga
+        spotDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            // Aquí puedes mostrar/ocultar un ProgressBar global si tu layout lo tuviera
+            // Por ejemplo, si tuvieras un ProgressBar con id 'progressBar' en este layout:
+            // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun setupListeners() {
+        binding.checkboxFavorite.setOnCheckedChangeListener { _, isChecked ->
+            // Cuando el usuario cambia el estado del checkbox, actualiza el ViewModel
+            currentSpotId?.let { id ->
+                spotDetailViewModel.toggleFavorite(id, !isChecked) // ¡Importante! currentIsFavorite es el estado antes del cambio
+            }
+        }
+        // Aquí configurarías los listeners para los otros botones de acción
         // binding.btnEditSpot.setOnClickListener { /* Navegar a la pantalla de edición */ }
         // binding.btnDeleteSpot.setOnClickListener { /* Mostrar diálogo de confirmación y eliminar */ }
         // binding.btnAddComment.setOnClickListener { /* Abrir diálogo para añadir comentario */ }
