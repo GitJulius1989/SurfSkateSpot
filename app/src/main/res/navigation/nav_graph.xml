@@ -46,6 +46,16 @@
     </fragment>
 
     <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.FavoritesFragment"
+        android:label="Favoritos"
+        tools:layout="@layout/fragment_spot_list" > <action
+        android:id="@+id/action_favoritesFragment_to_spotDetailFragment"
+        app:destination="@id/spotDetailFragment" />
+    </fragment>
+
+
+    <fragment
         android:id="@+id/spotDetailFragment"
         android:name="com.bioridelabs.surfskatespot.presentation.view.SpotDetailFragment"
         android:label="Detalles del Spot"

@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/favoritesFragment"
+        android:id="@+id/favoritesFragmentavoritesFragment"
         android:icon="@drawable/ic_star_border"
         android:title="Favoritos" />
 
     <item
-        android:id="@+id/mainContainerFragment"
+        android:id="@+id/mapFragment"
         android:icon="@drawable/ic_map"
         android:title="Mapa" />
 

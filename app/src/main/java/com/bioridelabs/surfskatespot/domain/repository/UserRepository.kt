@@ -5,14 +5,13 @@ import com.bioridelabs.surfskatespot.domain.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class UserRepository {
-
-    // Instancias de Firebase Auth y Firestore
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+class UserRepository @Inject constructor( // <--- ¡Añade @Inject aquí!
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) {
     private val usersCollection = firestore.collection("users")
-
     /**
      * Registra un nuevo usuario usando Firebase Authentication y guarda sus datos en Firestore.
      *
@@ -85,4 +84,39 @@ class UserRepository {
             false
         }
     }
+
+
+    /**
+     * Añade o elimina un spot de la lista de favoritos del usuario.
+     *
+     * @param userId El UID del usuario.
+     * @param spotId El ID del spot a añadir/eliminar.
+     * @param isFavorite Si es true, añade; si es false, elimina.
+     * @return true si la operación fue exitosa, false en caso contrario.
+     */
+    suspend fun toggleFavoriteSpot(userId: String, spotId: String, isFavorite: Boolean): Boolean {
+        return try {
+            val userRef = usersCollection.document(userId)
+            firestore.runTransaction { transaction ->
+                val userSnapshot = transaction.get(userRef)
+                val user = userSnapshot.toObject(User::class.java) ?: throw Exception("Usuario no encontrado")
+
+                val currentFavorites = user.favoritos.toMutableList()
+                if (isFavorite) {
+                    if (spotId !in currentFavorites) {
+                        currentFavorites.add(spotId)
+                    }
+                } else {
+                    currentFavorites.remove(spotId)
+                }
+                transaction.update(userRef, "favoritos", currentFavorites)
+            }.await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    // Añade el provide para FirebaseAuth en RepositoryModule
 }

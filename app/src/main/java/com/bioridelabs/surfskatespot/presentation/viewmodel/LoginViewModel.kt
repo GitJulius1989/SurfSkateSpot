@@ -8,12 +8,17 @@ import androidx.lifecycle.viewModelScope
 import com.bioridelabs.surfskatespot.domain.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class LoginViewModel : ViewModel() {
-
-    val userRepository = UserRepository()
+// Anota LoginViewModel con @HiltViewModel y modifica el constructor
+@HiltViewModel // <--- Añade esta anotación
+class LoginViewModel @Inject constructor( // <--- Añade @Inject y el parámetro
+    val userRepository: UserRepository, // <--- Inyecta UserRepository
+    private val firebaseAuth: FirebaseAuth // <--- También inyecta FirebaseAuth directamente aquí para Google Sign-In
+) : ViewModel() {
 
     // LiveData para comunicar el resultado del login (email/password) a la vista
     private val _loginResult = MutableLiveData<Boolean>()

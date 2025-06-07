@@ -2,11 +2,14 @@
 package com.bioridelabs.surfskatespot.di
 
 import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
+import com.bioridelabs.surfskatespot.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import com.google.firebase.firestore.FirebaseFirestore // Importa FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth // Importa FirebaseAuth
+
 
 // Este es un módulo Hilt que le dice a Dagger cómo proporcionar ciertas dependencias.
 @Module
@@ -21,6 +24,11 @@ object RepositoryModule {
     @Provides
     fun provideFirebaseFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
+    }
+
+    @Provides
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
     }
 
     // Método @Provides para el SpotRepository.
@@ -45,4 +53,10 @@ object RepositoryModule {
     }
     */
     // Pero por tu código anterior, parece que tu SpotRepository es una clase concreta.
+
+    // Nuevo: Provee una instancia de UserRepository
+    @Provides
+    fun provideUserRepository(auth: FirebaseAuth, firestore: FirebaseFirestore): UserRepository {
+        return UserRepository(auth, firestore)
+    }
 }
