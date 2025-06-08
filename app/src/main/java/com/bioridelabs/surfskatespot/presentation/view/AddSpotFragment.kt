@@ -4,6 +4,7 @@ package com.bioridelabs.surfskatespot.presentation.view
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -15,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -194,12 +196,30 @@ class AddSpotFragment : Fragment() {
     }
 
     private fun checkAndRequestGalleryPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ (API 33) usa READ_MEDIA_IMAGES
-            requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+        val permissionToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
         } else {
-            // Android 12 (API 32) e inferior usan READ_EXTERNAL_STORAGE
-            requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                permissionToRequest
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // Ya tienes permiso, lanza directamente el selector.
+                pickImageLauncher.launch("image/*")
+            }
+            shouldShowRequestPermissionRationale(permissionToRequest) -> {
+                // Opcional: Muestra un diálogo explicando por qué necesitas el permiso.
+                Snackbar.make(binding.root, R.string.permissions_needed_gallery, Snackbar.LENGTH_LONG)
+                    .setAction("OK") { requestPermissionLauncher.launch(permissionToRequest) }
+                    .show()
+            }
+            else -> {
+                // Pide el permiso por primera vez.
+                requestPermissionLauncher.launch(permissionToRequest)
+            }
         }
     }
 
