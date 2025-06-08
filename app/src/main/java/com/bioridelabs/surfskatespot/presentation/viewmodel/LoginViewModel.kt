@@ -39,12 +39,16 @@ class LoginViewModel @Inject constructor( // <--- Añade @Inject y el parámetro
         viewModelScope.launch {
             try {
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
-                val authResult = FirebaseAuth.getInstance().signInWithCredential(credential).await()
-                // Si la autenticación con Firebase es exitosa, actualiza el LiveData
-                _googleSignInResult.postValue(authResult.user != null)
+                val authResult = firebaseAuth.signInWithCredential(credential).await()
+
+                authResult.user?.let { firebaseUser ->
+                    // En lugar de solo notificar el éxito, ahora gestionamos los datos del usuario.
+                    userRepository.handleGoogleSignIn(firebaseUser)
+                    _googleSignInResult.postValue(true)
+                } ?: _googleSignInResult.postValue(false) // Si el usuario es nulo, falla.
+
             } catch (e: Exception) {
-                // Manejo de errores de autenticación con Firebase
-                Log.e("LoginViewModel", "Error al iniciar sesión con Google en Firebase: ${e.message}")
+                Log.e("LoginViewModel", "Error al iniciar sesión con Google: ${e.message}")
                 _googleSignInResult.postValue(false)
             }
         }

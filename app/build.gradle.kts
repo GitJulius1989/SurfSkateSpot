@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.analytics.ktx)
+    implementation("androidx.activity:activity-ktx:1.9.0")
 
     // Google Sign-In (usando alias de libs.versions.toml)
     implementation(libs.play.services.auth)
@@ -82,6 +83,7 @@ dependencies {
 
     // Hilt (usando alias de libs.versions.toml)
     implementation(libs.dagger.hilt.android)
+    implementation(libs.androidx.annotation)
     kapt(libs.dagger.hilt.compiler)
 
     // Glide (usando alias de libs.versions.toml) # <-- ¡CAMBIOS AQUÍ!

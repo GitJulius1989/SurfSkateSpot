@@ -19,7 +19,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 
 class SplashActivity : AppCompatActivity() {
 
-    private val splashDelay: Long = 3000 // Duración total de la splash screen en ms
+    private val splashDelay: Long = 2000 // Duración total de la splash screen en ms
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -3,6 +3,7 @@ package com.bioridelabs.surfskatespot.domain.repository
 
 import com.bioridelabs.surfskatespot.domain.model.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -118,5 +119,29 @@ class UserRepository @Inject constructor( // <--- ¡Añade @Inject aquí!
         }
     }
 
-    // Añade el provide para FirebaseAuth en RepositoryModule
+    /**
+     * Gestiona el inicio de sesión con Google. Comprueba si el usuario ya existe en Firestore.
+     * Si no existe (es la primera vez que inicia sesión), crea su documento.
+     * @param firebaseUser El objeto de usuario devuelto por Firebase Auth tras un login exitoso.
+     */
+    suspend fun handleGoogleSignIn(firebaseUser: FirebaseUser) {
+        val userDocRef = usersCollection.document(firebaseUser.uid)
+
+        // Usamos una transacción para asegurar que la operación de leer y escribir es atómica.
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(userDocRef)
+            if (!snapshot.exists()) {
+                // El usuario no existe en Firestore, así que lo creamos.
+                val newUser = User(
+                    userId = firebaseUser.uid,
+                    nombre = firebaseUser.displayName ?: "Sin Nombre",
+                    email = firebaseUser.email ?: "",
+                    fotoPerfilUrl = firebaseUser.photoUrl?.toString()
+                    // 'favoritos' y 'fechaRegistro' ya tienen valores por defecto en el data class.
+                )
+                transaction.set(userDocRef, newUser)
+            }
+            // Si el snapshot.exists() es true, no hacemos nada. El usuario ya estaba registrado.
+        }.await()
+    }
 }

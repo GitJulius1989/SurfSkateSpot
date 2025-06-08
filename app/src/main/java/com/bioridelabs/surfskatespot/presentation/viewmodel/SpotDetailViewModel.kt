@@ -5,8 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bioridelabs.surfskatespot.domain.model.Spot // Importa tu data class Spot
-import com.bioridelabs.surfskatespot.domain.repository.SpotRepository // Importa tu SpotRepository
+import com.bioridelabs.surfskatespot.domain.model.Spot
+import com.bioridelabs.surfskatespot.domain.repository.ImageStorageRepository // ¡Importar esta clase!
+import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
 import com.bioridelabs.surfskatespot.domain.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,8 +17,9 @@ import javax.inject.Inject
 @HiltViewModel
 class SpotDetailViewModel @Inject constructor(
     private val spotRepository: SpotRepository,
-    private val userRepository: UserRepository, // Inyecta UserRepository
-    private val firebaseAuth: FirebaseAuth      // Inyecta FirebaseAuth
+    private val userRepository: UserRepository,
+    private val firebaseAuth: FirebaseAuth,
+    private val imageStorageRepository: ImageStorageRepository // ¡ESTA DEPENDENCIA ES CLAVE Y DEBE ESTAR AQUÍ!
 ) : ViewModel() {
 
     private val _spotDetails = MutableLiveData<Spot?>()
@@ -32,31 +34,42 @@ class SpotDetailViewModel @Inject constructor(
     private val _isFavorite = MutableLiveData<Boolean>()
     val isFavorite: LiveData<Boolean> = _isFavorite
 
-    // Método para cargar los detalles del spot
+    // ¡ESTE LIVE DATA ES NECESARIO PARA LA LÓGICA DE PROPIETARIO!
+    private val _isOwner = MutableLiveData<Boolean>()
+    val isOwner: LiveData<Boolean> = _isOwner
+
+    // ¡ESTE LIVE DATA ES NECESARIO PARA EL RESULTADO DE LA ELIMINACIÓN!
+    private val _deleteSpotResult = MutableLiveData<Boolean>()
+    val deleteSpotResult: LiveData<Boolean> = _deleteSpotResult
+
+
     fun loadSpotDetails(spotId: String) {
         _isLoading.value = true
-        _errorMessage.value = null // Limpiar errores anteriores
+        _errorMessage.value = null
         viewModelScope.launch {
             try {
                 val spot = spotRepository.getSpot(spotId)
                 _spotDetails.value = spot
                 spot?.let {
-                    checkIfFavorite(it.spotId!!) // Verifica si es favorito después de cargar el spot
+                    checkIfFavorite(it.spotId!!)
+                    _isOwner.value = (firebaseAuth.currentUser?.uid == it.userId) // ¡ACTUALIZA EL ESTADO DE PROPIETARIO AQUÍ!
+                } ?: run {
+                    _isOwner.value = false // Si el spot no se encuentra, no es propietario
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error al cargar los detalles del spot: ${e.message}"
                 _spotDetails.value = null
+                _isOwner.value = false
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    // Nuevo método para verificar si el spot es favorito para el usuario actual
     private fun checkIfFavorite(spotId: String) {
         val currentUserId = firebaseAuth.currentUser?.uid
         if (currentUserId == null) {
-            _isFavorite.value = false // Si no hay usuario logueado, no puede ser favorito
+            _isFavorite.value = false
             return
         }
 
@@ -66,12 +79,11 @@ class SpotDetailViewModel @Inject constructor(
                 _isFavorite.value = user?.favoritos?.contains(spotId) ?: false
             } catch (e: Exception) {
                 _errorMessage.value = "Error al verificar el estado de favorito: ${e.message}"
-                _isFavorite.value = false // Asumir que no es favorito en caso de error
+                _isFavorite.value = false
             }
         }
     }
 
-    // Nuevo método para alternar el estado de favorito
     fun toggleFavorite(spotId: String, currentIsFavorite: Boolean) {
         val currentUserId = firebaseAuth.currentUser?.uid
         if (currentUserId == null) {
@@ -84,7 +96,7 @@ class SpotDetailViewModel @Inject constructor(
             try {
                 val success = userRepository.toggleFavoriteSpot(currentUserId, spotId, !currentIsFavorite)
                 if (success) {
-                    _isFavorite.value = !currentIsFavorite // Actualiza el LiveData inmediatamente en la UI
+                    _isFavorite.value = !currentIsFavorite
                     _errorMessage.value = if (!currentIsFavorite) "Spot añadido a favoritos." else "Spot eliminado de favoritos."
                 } else {
                     _errorMessage.value = "Error al actualizar favoritos."
@@ -97,13 +109,40 @@ class SpotDetailViewModel @Inject constructor(
         }
     }
 
+    // ¡ESTE MÉTODO ES NECESARIO PARA LA FUNCIÓN DE ELIMINAR SPOT!
+    fun deleteSpot(spotId: String) {
+        _isLoading.value = true
+        _errorMessage.value = null
+        viewModelScope.launch {
+            try {
+                val spot = spotDetails.value // Obtener el spot actual para sus fotos
+                if (spot == null || spot.spotId != spotId) {
+                    _errorMessage.value = "No se pudo encontrar el spot para eliminar."
+                    _deleteSpotResult.value = false
+                    return@launch
+                }
+
+                // 1. Eliminar fotos de Firebase Storage (si las hay)
+                spot.fotosUrls.forEach { imageUrl ->
+                    imageStorageRepository.deleteImage(imageUrl) // Usar la dependencia ImageStorageRepository
+                }
+
+                // 2. Eliminar spot de Firestore
+                val success = spotRepository.deleteSpot(spotId)
+                _deleteSpotResult.value = success
+                if (!success) {
+                    _errorMessage.value = "Error al eliminar el spot de la base de datos."
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error inesperado al eliminar spot: ${e.message}"
+                _deleteSpotResult.value = false
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun clearErrorMessage() {
         _errorMessage.value = null
     }
-
-    // Método para determinar si el usuario actual es el propietario del spot (si lo necesitas)
-    fun isCurrentUserSpotOwner(ownerId: String): Boolean {
-        return firebaseAuth.currentUser?.uid == ownerId
-    }
 }
-

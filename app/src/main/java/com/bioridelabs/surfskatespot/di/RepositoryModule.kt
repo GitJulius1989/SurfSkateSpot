@@ -39,7 +39,7 @@ object RepositoryModule {
         return FirebaseAuth.getInstance()
     }
 
-    // Método @Provides para el SpotRepository.
+    // Metodo @Provides para el SpotRepository.
     // Dagger Hilt ahora sabe cómo construir SpotRepository porque puede proporcionar FirebaseFirestore.
     @Provides
     fun provideSpotRepository(firestore: FirebaseFirestore): SpotRepository {
@@ -49,18 +49,6 @@ object RepositoryModule {
         // return SpotRepositoryImpl(firestore)
         return SpotRepository(firestore) // Aquí se asume que tu SpotRepository tiene un constructor (firestore: FirebaseFirestore)
     }
-
-    // Si tu SpotRepository fuera una INTERFACE, y tu implementación se llamara SpotRepositoryImpl,
-    // usarías un @Binds en un módulo abstracto:
-    /*
-    @Module
-    @InstallIn(SingletonComponent::class)
-    abstract class RepositoryBindingsModule {
-        @Binds
-        abstract fun bindSpotRepository(impl: SpotRepositoryImpl): SpotRepository
-    }
-    */
-    // Pero por tu código anterior, parece que tu SpotRepository es una clase concreta.
 
     // Nuevo: Provee una instancia de UserRepository
     @Provides

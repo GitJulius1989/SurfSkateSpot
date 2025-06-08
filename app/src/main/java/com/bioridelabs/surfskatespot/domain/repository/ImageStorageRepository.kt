@@ -48,4 +48,22 @@ class ImageStorageRepository @Inject constructor(
             false
         }
     }
+
+    /**
+     * Sube una imagen de perfil a Firebase Storage.
+     * @param userId El UID del usuario para crear una ruta única.
+     * @param imageUri La URI local de la imagen a subir.
+     * @return La URL de descarga pública de la imagen subida.
+     */
+    suspend fun uploadProfileImage(userId: String, imageUri: Uri): String {
+        // Creamos una referencia única para la imagen, ej: profile_images/USER_ID/RANDOM_UUID.jpg
+        val fileName = "${UUID.randomUUID()}.jpg"
+        val imageRef = firebaseStorage.reference.child("profile_images/$userId/$fileName")
+
+        // Subimos el archivo
+        imageRef.putFile(imageUri).await()
+
+        // Obtenemos y devolvemos la URL de descarga
+        return imageRef.downloadUrl.await().toString()
+    }
 }

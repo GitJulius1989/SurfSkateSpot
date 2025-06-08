@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bioridelabs.surfskatespot.domain.model.SportType
 import com.bioridelabs.surfskatespot.domain.model.Spot
 import com.bioridelabs.surfskatespot.domain.repository.ImageStorageRepository
 import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
@@ -31,8 +32,9 @@ class AddSpotViewModel @Inject constructor(
     private val _spotDescription = MutableStateFlow("")
     val spotDescription: StateFlow<String> = _spotDescription.asStateFlow()
 
-    private val _selectedSportTypes = MutableStateFlow(setOf<String>())
-    val selectedSportTypes: StateFlow<Set<String>> = _selectedSportTypes.asStateFlow()
+    // Usamos MutableLiveData<SportType?> para almacenar el tipo seleccionado o null si ninguno.
+    private val _selectedSportType = MutableLiveData<SportType?>(null)
+    val selectedSportType: MutableLiveData<SportType?> = _selectedSportType
 
     private val _selectedLocation = MutableLiveData<Pair<Double, Double>?>() // Latitud, Longitud
     val selectedLocation: LiveData<Pair<Double, Double>?> = _selectedLocation
@@ -59,11 +61,12 @@ class AddSpotViewModel @Inject constructor(
         _spotDescription.value = description
     }
 
-    fun onSportTypeChanged(type: String, isChecked: Boolean) {
-        _selectedSportTypes.value = if (isChecked) {
-            _selectedSportTypes.value + type
+    fun onSportTypeSelected(sportType: SportType) {
+        // Si el tipo seleccionado es el mismo que ya está, lo deseleccionamos (toggle)
+        if (_selectedSportType.value == sportType) {
+            _selectedSportType.value = null
         } else {
-            _selectedSportTypes.value - type
+            _selectedSportType.value = sportType
         }
     }
 
@@ -93,7 +96,7 @@ class AddSpotViewModel @Inject constructor(
 
         val name = _spotName.value.trim()
         val description = _spotDescription.value.trim()
-        val sportTypes = _selectedSportTypes.value
+        val sportType = _selectedSportType.value // Obtener el tipo de deporte seleccionado (puede ser null)
         val location = _selectedLocation.value
         val photoUris = _selectedPhotoUris.value ?: emptyList()
 
@@ -106,8 +109,9 @@ class AddSpotViewModel @Inject constructor(
             _addSpotResult.value = false
             return
         }
-        if (name.isBlank() || description.isBlank() || sportTypes.isEmpty() || location == null) {
-            _errorMessage.value = "Por favor, completa todos los campos requeridos y selecciona una ubicación."
+        // CAMBIO: La validación ahora usa 'sportType' directamente
+        if (name.isBlank() || description.isBlank() || sportType == null || location == null) {
+            _errorMessage.value = "Por favor, completa todos los campos requeridos y selecciona un tipo de deporte y una ubicación."
             _isLoading.value = false
             _addSpotResult.value = false
             return
@@ -136,7 +140,9 @@ class AddSpotViewModel @Inject constructor(
                     userId = userId,
                     nombre = name,
                     descripcion = description,
-                    tiposDeporte = sportTypes.toList(), // Convertir Set a List
+                    // CAMBIO 2: Usar 'sportType.type' con el operador de aserción no nula '!!'
+                    // Ya validamos que 'sportType' no es null justo antes.
+                    tiposDeporte = listOf(sportType!!.type), // ¡CORRECCIÓN CLAVE AQUÍ!
                     latitud = location.first,
                     longitud = location.second,
                     fotosUrls = uploadedPhotoUrls
@@ -148,7 +154,7 @@ class AddSpotViewModel @Inject constructor(
                     _addSpotResult.value = true
                     _spotName.value = "" // Limpiar campos después de guardar
                     _spotDescription.value = ""
-                    _selectedSportTypes.value = emptySet()
+                    _selectedSportType.value = null // Deseleccionar el tipo de deporte
                     _selectedLocation.value = null
                     _selectedPhotoUris.value = mutableListOf()
                 } else {

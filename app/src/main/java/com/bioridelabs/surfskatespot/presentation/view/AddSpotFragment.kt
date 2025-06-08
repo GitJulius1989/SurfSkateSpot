@@ -22,13 +22,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bioridelabs.surfskatespot.R
 import com.bioridelabs.surfskatespot.databinding.FragmentAddSpotBinding
+import com.bioridelabs.surfskatespot.domain.model.SportType
 import com.bioridelabs.surfskatespot.presentation.view.adapter.AddPhotoAdapter // Crearemos este adaptador
 import com.bioridelabs.surfskatespot.presentation.viewmodel.AddSpotViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.bioridelabs.surfskatespot.utils.textChanges
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest // Para StateFlow
 import kotlinx.coroutines.launch
+
 
 @AndroidEntryPoint
 class AddSpotFragment : Fragment() {
@@ -129,22 +132,30 @@ class AddSpotFragment : Fragment() {
         }
 
         // Checkbox listeners
-        binding.checkboxSurf.setOnCheckedChangeListener { _, isChecked ->
-            addSpotViewModel.onSportTypeChanged("Surf", isChecked)
+        binding.checkboxSurf.setOnClickListener {
+            addSpotViewModel.onSportTypeSelected(SportType.SURF)
         }
-        binding.checkboxSkate.setOnCheckedChangeListener { _, isChecked ->
-            addSpotViewModel.onSportTypeChanged("Skate", isChecked)
+        binding.checkboxSurfskate.setOnClickListener {
+            addSpotViewModel.onSportTypeSelected(SportType.SURFSKATE)
         }
-        binding.checkboxSurfskate.setOnCheckedChangeListener { _, isChecked ->
-            addSpotViewModel.onSportTypeChanged("Surfskate", isChecked)
+        binding.checkboxSkatepark.setOnClickListener {
+            addSpotViewModel.onSportTypeSelected(SportType.SKATEPARK)
         }
 
         // Botón Seleccionar Ubicación
         binding.btnSelectLocation.setOnClickListener {
-            // Navega al nuevo fragmento de selección de mapa
-            findNavController().navigate(R.id.action_addSpotFragment_to_selectLocationFragment)
-        }
+            // Navegar a MapFragment en modo selección
+            // Puedes pasar la ubicación actual del ViewModel si ya hay una seleccionada
+            val currentLat = addSpotViewModel.selectedLocation.value?.first ?: 0.0
+            val currentLon = addSpotViewModel.selectedLocation.value?.second ?: 0.0
+            val initialLatLng = if (currentLat != 0.0 || currentLon != 0.0) LatLng(currentLat, currentLon) else null
 
+            val action = AddSpotFragmentDirections.actionAddSpotFragmentToMapFragmentForSelection(
+                selectionMode = true, // Siempre true para este modo
+                selectedLocation = initialLatLng
+            )
+            findNavController().navigate(action)
+        }
         // Botón Añadir Foto
         binding.btnAddPhoto.setOnClickListener {
             checkAndRequestGalleryPermissions()

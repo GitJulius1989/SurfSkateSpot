@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="red_500">#F44336</color>
     <color name="design_default_color_error">#B00020</color>
+    <color name="yellow_gold">#FFD700</color>
 </resources>

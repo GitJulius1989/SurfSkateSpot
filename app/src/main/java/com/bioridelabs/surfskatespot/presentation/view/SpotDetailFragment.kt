@@ -12,8 +12,10 @@ import androidx.navigation.fragment.navArgs
 import com.bioridelabs.surfskatespot.databinding.FragmentSpotDetailBinding
 import com.bioridelabs.surfskatespot.presentation.viewmodel.SpotDetailViewModel
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 
 // Fragmento para mostrar los detalles de un spot específico.
+@AndroidEntryPoint
 class SpotDetailFragment : Fragment() {
 
     private var _binding: FragmentSpotDetailBinding? = null
