@@ -1,3 +1,5 @@
+// En /presentation/view/SelectLocationFragment.kt (Versión Definitiva)
+
 package com.bioridelabs.surfskatespot.presentation.view
 
 import android.os.Bundle
@@ -26,6 +28,7 @@ class SelectLocationFragment : Fragment(), OnMapReadyCallback {
     private var map: GoogleMap? = null
     private var selectedLatLng: LatLng? = null
 
+    // Claves para la comunicación entre fragmentos. Es una excelente práctica tenerlas en un companion object.
     companion object {
         const val REQUEST_KEY = "location_request"
         const val BUNDLE_KEY_LATITUDE = "latitude"
@@ -45,24 +48,27 @@ class SelectLocationFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        // Ubicación inicial por defecto (Santander, una buena elección 🌊)
         val santander = LatLng(43.4623, -3.8099)
         map?.moveCamera(CameraUpdateFactory.newLatLngZoom(santander, 12f))
 
+        // Listener para la pulsación larga: la lógica que querías restaurar.
         map?.setOnMapLongClickListener { latLng ->
             selectedLatLng = latLng
-            map?.clear()
+            map?.clear() // Limpiamos marcadores anteriores
             map?.addMarker(MarkerOptions().position(latLng).title("Ubicación Seleccionada"))
-            binding.fabConfirmLocation.isVisible = true // Muestra el botón de confirmar
+            binding.fabConfirmLocation.isVisible = true // Mostramos el botón para confirmar
         }
 
+        // Listener para el FAB de confirmación.
         binding.fabConfirmLocation.setOnClickListener {
             selectedLatLng?.let { location ->
-                // Envía el resultado de vuelta a AddSpotFragment
+                // Usamos setFragmentResult para enviar los datos de vuelta a AddSpotFragment.
                 setFragmentResult(REQUEST_KEY, bundleOf(
                     BUNDLE_KEY_LATITUDE to location.latitude,
                     BUNDLE_KEY_LONGITUDE to location.longitude
                 ))
-                findNavController().popBackStack() // Cierra este fragmento
+                findNavController().popBackStack() // Cerramos este fragmento y volvemos al anterior.
             }
         }
     }

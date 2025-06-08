@@ -88,6 +88,7 @@ class AddSpotFragment : Fragment() {
 
         // Escucha el resultado que viene de SelectLocationFragment
         parentFragmentManager.setFragmentResultListener(SelectLocationFragment.REQUEST_KEY, viewLifecycleOwner) { key, bundle ->
+            // Cuando el resultado llega, actualizamos el ViewModel.
             val latitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LATITUDE)
             val longitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LONGITUDE)
             addSpotViewModel.onLocationSelected(latitude, longitude)
@@ -142,19 +143,9 @@ class AddSpotFragment : Fragment() {
             addSpotViewModel.onSportTypeSelected(SportType.SKATEPARK)
         }
 
-        // Botón Seleccionar Ubicación
         binding.btnSelectLocation.setOnClickListener {
-            // Navegar a MapFragment en modo selección
-            // Puedes pasar la ubicación actual del ViewModel si ya hay una seleccionada
-            val currentLat = addSpotViewModel.selectedLocation.value?.first ?: 0.0
-            val currentLon = addSpotViewModel.selectedLocation.value?.second ?: 0.0
-            val initialLatLng = if (currentLat != 0.0 || currentLon != 0.0) LatLng(currentLat, currentLon) else null
-
-            val action = AddSpotFragmentDirections.actionAddSpotFragmentToMapFragmentForSelection(
-                selectionMode = true, // Siempre true para este modo
-                selectedLocation = initialLatLng
-            )
-            findNavController().navigate(action)
+            // Navegamos a nuestro fragmento dedicado, que es más limpio y específico.
+            findNavController().navigate(R.id.action_addSpotFragment_to_selectLocationFragment)
         }
         // Botón Añadir Foto
         binding.btnAddPhoto.setOnClickListener {
@@ -182,7 +173,7 @@ class AddSpotFragment : Fragment() {
             if (success) {
                 Snackbar.make(binding.root, R.string.spot_added_success, Snackbar.LENGTH_LONG).show()
                 // Opcional: Navegar de vuelta al mapa o a la lista de spots
-                findNavController().navigate(R.id.action_addSpotFragment_to_mapFragment)
+                findNavController().navigate(R.id.action_addSpotFragment_to_selectLocationFragment)
             }
         }
 

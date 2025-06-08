@@ -171,26 +171,25 @@
         android:label="@string/anadir_spot"
         tools:layout="@layout/fragment_add_spot">
 
-        <argument
-            android:name="latitude"
-            app:argType="float" />
-        <argument
-            android:name="longitude"
-            app:argType="float" />
+        <action
+            android:id="@+id/action_addSpotFragment_to_selectLocationFragment"
+            app:destination="@id/selectLocationFragment" />
 
         <action
-            android:id="@+id/action_addSpotFragment_to_mapFragment"
-            app:destination="@id/mapFragment"
-            app:popUpTo="@id/mapFragment"
-            app:popUpToInclusive="true" /> <action
-        android:id="@+id/action_addSpotFragment_to_mapFragmentForSelection"
-        app:destination="@id/mapFragment">
-        <argument
-            android:name="selectionMode"
-            app:argType="boolean"
-            android:defaultValue="true" />
-    </action>
+            android:id="@+id/action_addSpotFragment_to_mapFragmentForSelection"
+            app:destination="@id/mapFragment">
+            <argument
+                android:name="selectionMode"
+                app:argType="boolean"
+                android:defaultValue="true" />
+        </action>
     </fragment>
+
+    <fragment
+        android:id="@+id/selectLocationFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.SelectLocationFragment"
+        android:label="Seleccionar Ubicación"
+        tools:layout="@layout/fragment_select_location" />
 
     <action
         android:id="@+id/action_global_loginFragment"

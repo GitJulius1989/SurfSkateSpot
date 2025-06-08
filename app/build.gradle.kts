@@ -67,6 +67,8 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.analytics.ktx)
     implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+
 
     // Google Sign-In (usando alias de libs.versions.toml)
     implementation(libs.play.services.auth)

@@ -49,8 +49,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var layerToggleButton: FloatingActionButton
     private lateinit var spotsVisibilityFab: FloatingActionButton
 
-    // Botón de confirmar para el modo selección (debe estar en el layout de fragment_map)
-    private var btnConfirmLocation: Button? = null
+
 
     private var isSatelliteView = false
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -63,7 +62,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
-        btnConfirmLocation = view.findViewById(R.id.btnConfirmLocation) // Inicializar el botón de confirmar
         return view
     }
 
@@ -97,8 +95,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             mainViewModel.spots.observe(viewLifecycleOwner) { spots ->
                 drawSpotsOnMap(spots)
             }
-        } else {
-            setupSelectionMode() // Si estamos en modo selección, configurar solo ese modo
         }
     }
 
@@ -223,47 +219,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 setupMap()
             } else {
                 Toast.makeText(context, "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    // Lógica para el modo de selección de ubicación
-    private var draggableMarker: Marker? = null
-
-    private fun setupSelectionMode() {
-        map?.let { googleMap ->
-            // Ocultar botones de acción si están en el layout y son visibles
-            layerToggleButton.visibility = View.GONE
-            spotsVisibilityFab.visibility = View.GONE
-
-            // Asegurarse de que el botón de confirmar sea visible
-            btnConfirmLocation?.visibility = View.VISIBLE
-            btnConfirmLocation?.text = getString(R.string.save_spot_button)
-
-            val initialLocation = args.selectedLocation ?: LatLng(43.46, -3.81) // Santander por defecto
-            draggableMarker = googleMap.addMarker(
-                MarkerOptions()
-                    .position(initialLocation)
-                    .title("Arrastra para seleccionar")
-                    .draggable(true)
-            )
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, 14f))
-
-            googleMap.setOnMarkerDragListener(object : GoogleMap.OnMarkerDragListener {
-                override fun onMarkerDragStart(marker: Marker) {}
-                override fun onMarkerDrag(marker: Marker) {}
-                override fun onMarkerDragEnd(marker: Marker) {
-                    Toast.makeText(context, "Ubicación: %.4f, %.4f".format(marker.position.latitude, marker.position.longitude), Toast.LENGTH_SHORT).show()
-                }
-            })
-
-            btnConfirmLocation?.setOnClickListener {
-                draggableMarker?.position?.let { latLng ->
-                    // Devolver el resultado a AddSpotFragment
-                    val result = bundleOf("selectedLatitude" to latLng.latitude, "selectedLongitude" to latLng.longitude)
-                    setFragmentResult("requestKey_LocationSelection", result) // Usa un request key único
-                    findNavController().popBackStack() // Regresa al fragmento anterior (AddSpotFragment)
-                }
             }
         }
     }
