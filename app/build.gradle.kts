@@ -1,3 +1,5 @@
+// app/build.gradle.kts
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -50,14 +52,13 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.activity) // Añadido: `activity` es común y ya está en tu TOML
+    implementation(libs.androidx.activity)
 
     // Lifecycle & Navigation (usando alias de libs.versions.toml)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-
 
     // Firebase (Auth, Firestore, Storage, Analytics) (usando alias y plataforma de libs.versions.toml)
     implementation(platform(libs.firebase.bom))
@@ -73,6 +74,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
     // Volley (si lo necesitas y está en libs.versions.toml)
     implementation(libs.volley)
@@ -80,6 +83,10 @@ dependencies {
     // Hilt (usando alias de libs.versions.toml)
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.compiler)
+
+    // Glide (usando alias de libs.versions.toml) # <-- ¡CAMBIOS AQUÍ!
+    implementation(libs.glide)
+    kapt(libs.glide.compiler)
 
     // Test (usando alias de libs.versions.toml)
     testImplementation(libs.junit)

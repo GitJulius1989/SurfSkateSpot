@@ -24,4 +24,32 @@
     <string name="sobre_nosotros">Sobre Nosotros</string>
     <string name="cerrar_sesi_n">Cerrar Sesión</string>
     <string name="no_hay_spots_disponibles_por_el_momento">No hay spots disponibles por el momento.</string>
+    <string name="favoritos">Favoritos</string>
+    <string name="lista_de_spots">Lista de Spots</string>
+    <string name="configuracion_title">Configuración</string>
+    <string name="alto_contraste_label">Modo Alto Contraste</string>
+    <string name="idioma_label">Idioma:</string>
+    <string name="preferencias_guardadas">Preferencias de la app aplicadas</string>
+    <string name="reinicia_para_cambios_idioma">Reinicia para actualizar el idioma</string>
+    <string name="anadir_spot">Añadir Spot</string>
+    <string name="mi_perfil">Mi Perfil</string>
+
+    <string name="spot_name_hint">Nombre del Spot</string>
+    <string name="spot_description_hint">Describe el spot (olas, superficie, horarios...)</string>
+    <string name="select_sport_types_label">Tipos de Deporte:</string>
+    <string name="sport_type_surf">Surf</string>
+    <string name="sport_type_skate">Skate</string>
+    <string name="sport_type_surfskate">Surfskate</string>
+    <string name="spot_location_label">Ubicación del Spot:</string>
+    <string name="location_not_selected">Ubicación no seleccionada</string>
+    <string name="select_location_button">Seleccionar en el Mapa</string>
+    <string name="spot_photos_label">Fotos del Spot:</string>
+    <string name="add_photo_button">Añadir Foto</string>
+    <string name="save_spot_button">Guardar Spot</string>
+    <string name="spot_added_success">Spot añadido correctamente.</string>
+    <string name="spot_added_error">Error al añadir el spot: %1$s</string>
+    <string name="validation_error">Por favor, completa todos los campos requeridos y selecciona una ubicación.</string>
+    <string name="photo_upload_error">Error al subir una o más fotos.</string>
+    <string name="permissions_denied_gallery">Permisos de galería denegados. No se pueden seleccionar fotos.</string>
+    <string name="permissions_needed_gallery">Se necesitan permisos para acceder a la galería.</string>
 </resources>

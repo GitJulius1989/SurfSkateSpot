@@ -30,11 +30,13 @@ class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO
         }
     }
 
+
     // Agregar un nuevo spot
     suspend fun addSpot(spot: Spot): Boolean {
         return try {
+            // Asegúrate de que Spot tenga sus fotosUrls ya cargadas con URLs de Storage
             val docRef = spotsCollection.add(spot).await()
-            // Opcional: asignar el ID generado al objeto Spot
+            // Opcional: asignar el ID generado al objeto Spot (útil si lo usas después)
             spot.spotId = docRef.id
             true
         } catch (e: Exception) {

@@ -1,6 +1,7 @@
 // app/src/main/java/com/bioridelabs/surfskatespot/di/RepositoryModule.kt
 package com.bioridelabs.surfskatespot.di
 
+import com.bioridelabs.surfskatespot.domain.repository.ImageStorageRepository
 import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
 import com.bioridelabs.surfskatespot.domain.repository.UserRepository
 import dagger.Module
@@ -9,6 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth // Importa FirebaseAuth
+import com.google.firebase.storage.FirebaseStorage
 
 
 // Este es un módulo Hilt que le dice a Dagger cómo proporcionar ciertas dependencias.
@@ -24,6 +26,12 @@ object RepositoryModule {
     @Provides
     fun provideFirebaseFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
+    }
+
+    //  PROPORCIONA FirebaseStorage
+    @Provides
+    fun provideFirebaseStorage(): FirebaseStorage {
+        return FirebaseStorage.getInstance()
     }
 
     @Provides
@@ -58,5 +66,10 @@ object RepositoryModule {
     @Provides
     fun provideUserRepository(auth: FirebaseAuth, firestore: FirebaseFirestore): UserRepository {
         return UserRepository(auth, firestore)
+    }
+
+    @Provides
+    fun provideImageStorageRepository(firebaseStorage: FirebaseStorage): ImageStorageRepository {
+        return ImageStorageRepository(firebaseStorage)
     }
 }

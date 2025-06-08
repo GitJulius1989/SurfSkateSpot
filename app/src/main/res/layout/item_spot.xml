@@ -20,11 +20,14 @@
             android:id="@+id/ivSpotThumbnail"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:layout_marginTop="12dp"
             android:background="#E0E0E0"
             android:contentDescription="Miniatura del Spot"
             android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
             tools:src="@android:drawable/ic_menu_compass" />
 
         <TextView
@@ -32,11 +35,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:textStyle="bold"
-            android:textSize="18sp"
             android:textColor="?android:attr/textColorPrimary"
-            app:layout_constraintStart_toEndOf="@id/ivSpotThumbnail"
+            android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivSpotThumbnail"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Nombre del Spot" />
 
@@ -46,12 +49,52 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
-            android:textSize="14sp"
             android:textColor="?android:attr/textColorSecondary"
-            app:layout_constraintStart_toEndOf="@id/ivSpotThumbnail"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivSpotThumbnail"
             app:layout_constraintTop_toBottomOf="@id/tvSpotName"
             tools:text="Tipo: Surf, Skate" />
+
+        <LinearLayout
+            android:id="@+id/llSpotRating"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivSpotThumbnail"
+            app:layout_constraintTop_toBottomOf="@id/tvSpotType">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="Icono de estrella de valoración"
+                android:src="@drawable/ic_star_border"
+                app:tint="?attr/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tvSpotRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="4.5" />
+
+            <TextView
+                android:id="@+id/tvTotalRatings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp"
+                tools:text="(123 valoraciones)" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvSpotDescriptionShort"
@@ -59,12 +102,12 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
-            android:maxLines="2"
             android:ellipsize="end"
+            android:maxLines="2"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/ivSpotThumbnail"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvSpotType"
+            app:layout_constraintStart_toEndOf="@id/ivSpotThumbnail"
+            app:layout_constraintTop_toBottomOf="@id/llSpotRating"
             tools:text="Una breve descripción del spot. Lugar ideal para..." />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

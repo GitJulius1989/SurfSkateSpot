@@ -17,6 +17,7 @@
             app:popUpToInclusive="true"
             app:launchSingleTop="true" />
     </fragment>
+
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.bioridelabs.surfskatespot.presentation.view.MapFragment"
@@ -26,34 +27,67 @@
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.bioridelabs.surfskatespot.presentation.view.UserProfileFragment"
-        android:label="Perfil"
-        tools:layout="@layout/fragment_user_profile" />
+        android:label="@string/perfil"
+        tools:layout="@layout/fragment_user_profile" >
+        <action
+            android:id="@+id/action_profileFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="true" />
+    </fragment>
+
     <fragment
         android:id="@+id/aboutUsFragment"
         android:name="com.bioridelabs.surfskatespot.presentation.view.AboutUsFragment"
-        android:label="AboutUsFragment"
-        tools:layout="@layout/fragment_about_us" />
-
+        android:label="@string/sobre_nosotros"
+        tools:layout="@layout/fragment_about_us" >
+        <action
+            android:id="@+id/action_aboutUsFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/spotListFragment"
         android:name="com.bioridelabs.surfskatespot.presentation.view.SpotListFragment"
-        android:label="Lista de Spots"
+        android:label="@string/lista_de_spots"
         tools:layout="@layout/fragment_spot_list">
         <action
             android:id="@+id/action_spotListFragment_to_spotDetailFragment"
-            app:destination="@id/spotDetailFragment" />
+            app:destination="@id/spotDetailFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="false"              />
+        <action
+            android:id="@+id/action_spotListFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="true" />
     </fragment>
 
     <fragment
         android:id="@+id/favoritesFragment"
         android:name="com.bioridelabs.surfskatespot.presentation.view.FavoritesFragment"
-        android:label="Favoritos"
-        tools:layout="@layout/fragment_spot_list" > <action
-        android:id="@+id/action_favoritesFragment_to_spotDetailFragment"
-        app:destination="@id/spotDetailFragment" />
+        android:label="@string/favoritos"
+        tools:layout="@layout/fragment_spot_list" >
+        <action
+            android:id="@+id/action_favoritesFragment_to_spotDetailFragment"
+            app:destination="@id/spotDetailFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="false"
+            />
+        <action
+            android:id="@+id/action_favoritesFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="true" />
     </fragment>
-
 
     <fragment
         android:id="@+id/spotDetailFragment"
@@ -64,15 +98,84 @@
             android:name="spotId"
             app:argType="string"
             app:nullable="false" />
+        <action
+            android:id="@+id/action_spotDetailFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.SettingsFragment"
+        android:label="@string/configuracion_title"
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addSpotFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.AddSpotFragment"
+        android:label="@string/anadir_spot"
+        tools:layout="@layout/fragment_add_spot">
+        <action
+            android:id="@+id/action_addSpotFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/selectLocationFragment"
+        android:name="com.bioridelabs.surfskatespot.presentation.view.SelectLocationFragment"
+        android:label="Seleccionar Ubicación"
+        tools:layout="@layout/fragment_select_location" />
+
+    <action
+        android:id="@+id/action_addSpotFragment_to_selectLocationFragment"
+        app:destination="@id/selectLocationFragment" />
+
+    <action
+        android:id="@+id/action_mapFragment_to_addSpotFragment"
+        app:destination="@id/addSpotFragment"
+        app:popUpTo="@id/mapFragment"
+        app:popUpToInclusive="false"
+        app:launchSingleTop="false" />
+
+    <action
+        android:id="@+id/action_mapFragment_to_settingsFragment"
+        app:destination="@id/settingsFragment"
+        app:popUpTo="@id/mapFragment"
+        app:popUpToInclusive="false"
+        app:launchSingleTop="false" />
 
     <action
         android:id="@+id/action_mapFragment_to_spotListFragment"
-        app:destination="@id/spotListFragment" />
+        app:destination="@id/spotListFragment"
+        app:popUpTo="@id/mapFragment"
+        app:popUpToInclusive="false"
+        app:launchSingleTop="false"
+        />
+
+    <action
+        android:id="@+id/action_mapFragment_to_favoritesFragment"
+        app:destination="@id/favoritesFragment"
+        app:popUpTo="@id/mapFragment"
+        app:popUpToInclusive="false"
+        app:launchSingleTop="false"
+        />
 
     <action
         android:id="@+id/action_global_loginFragment"
         app:destination="@id/loginFragment"
         app:popUpTo="@id/nav_graph"
         app:popUpToInclusive="true" />
+
 </navigation>

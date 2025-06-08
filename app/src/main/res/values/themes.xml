@@ -1,12 +1,43 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Base.Theme.SurfSkateSpot" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorError">@color/red_500</item> <item name="colorOnError">@color/white</item>
+        <item name="colorError">@color/red_500</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/black</item>
+
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.SurfSkateSpot.HeadlineMedium</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.SurfSkateSpot.BodyLarge</item>
     </style>
 
     <style name="Theme.SurfSkateSpot" parent="Base.Theme.SurfSkateSpot" />
 
+    <style name="Theme.SurfSkateSpot.HighContrast" parent="Base.Theme.SurfSkateSpot">
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.SurfSkateSpot.HeadlineMedium.HighContrast</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.SurfSkateSpot.BodyLarge.HighContrast</item>
+    </style>
+
     <style name="Widget.Material3.Button.OutlinedButton.Danger" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:textColor">?attr/colorError</item>
         <item name="strokeColor">?attr/colorError</item>
+    </style>
+
+    <style name="TextAppearance.SurfSkateSpot.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="TextAppearance.SurfSkateSpot.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="TextAppearance.SurfSkateSpot.HeadlineMedium.HighContrast" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">28sp</item> <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.SurfSkateSpot.BodyLarge.HighContrast" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">20sp</item> <item name="android:textStyle">bold</item>
     </style>
 </resources>

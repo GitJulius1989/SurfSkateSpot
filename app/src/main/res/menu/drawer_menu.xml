@@ -4,12 +4,15 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/profileFragment"
-            android:title="Mi Perfil" />
+            android:title="@string/mi_perfil" />
         <item
             android:id="@+id/addSpotFragment"
-            android:title="Añadir Spot" />
+            android:title="@string/anadir_spot" />
         <item
             android:id="@+id/aboutUsFragment"
-            android:title="Sobre Nosotros" />
+            android:title="@string/sobre_nosotros" />
+        <item
+            android:id="@+id/settingsFragment"
+            android:title="@string/configuracion_title" />
     </group>
 </menu>
