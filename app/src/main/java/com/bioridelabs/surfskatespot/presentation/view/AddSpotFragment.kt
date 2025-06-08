@@ -83,6 +83,13 @@ class AddSpotFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Escucha el resultado que viene de SelectLocationFragment
+        parentFragmentManager.setFragmentResultListener(SelectLocationFragment.REQUEST_KEY, viewLifecycleOwner) { key, bundle ->
+            val latitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LATITUDE)
+            val longitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LONGITUDE)
+            addSpotViewModel.onLocationSelected(latitude, longitude)
+        }
+
         setupUI()
         setupListeners()
         observeViewModel()
@@ -134,14 +141,8 @@ class AddSpotFragment : Fragment() {
 
         // Botón Seleccionar Ubicación
         binding.btnSelectLocation.setOnClickListener {
-            // TODO: Implementar la navegación a un fragmento de mapa para seleccionar la ubicación.
-            // Por ahora, simularemos la selección o usaremos una ubicación predeterminada.
-            // Puedes navegar a un MapFragment que permita al usuario seleccionar un punto
-            // y luego devuelva el resultado usando el Navigation Component.
-            // Para una selección de mapa más compleja, podrías lanzar una actividad.
-            // pickLocationLauncher.launch(Intent(requireContext(), MapSelectionActivity::class.java)) // Ejemplo de lanzar actividad
-            Toast.makeText(context, "Simulando selección de ubicación...", Toast.LENGTH_SHORT).show()
-            addSpotViewModel.onLocationSelected(43.4623, -3.8100) // Coordenadas de Santander
+            // Navega al nuevo fragmento de selección de mapa
+            findNavController().navigate(R.id.action_addSpotFragment_to_selectLocationFragment)
         }
 
         // Botón Añadir Foto
