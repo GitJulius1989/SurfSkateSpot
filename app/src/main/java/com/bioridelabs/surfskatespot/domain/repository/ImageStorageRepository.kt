@@ -1,4 +1,4 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/domain/repository/ImageStorageRepository.kt
+// En: domain/repository/ImageStorageRepository.kt
 package com.bioridelabs.surfskatespot.domain.repository
 
 import android.net.Uri
@@ -15,11 +15,50 @@ class ImageStorageRepository @Inject constructor(
     private val storageRef: StorageReference = firebaseStorage.reference
 
     /**
-     * Sube una imagen a Firebase Storage.
-     * @param imageUri La Uri local de la imagen a subir.
-     * @param userId El ID del usuario que sube la imagen (para organizar en Storage).
-     * @return La URL de descarga de la imagen si la subida fue exitosa, o null en caso de error.
+     * Sube los bytes de una imagen comprimida a Firebase Storage.
+     * @param imageData Los datos de la imagen como ByteArray.
+     * @param userId El ID del usuario que sube la imagen.
+     * @return La URL de descarga de la imagen.
      */
+    suspend fun uploadImageBytes(imageData: ByteArray, userId: String): String {
+        val imageFileName = "spots/${userId}/${UUID.randomUUID()}.jpg"
+        val imageRef = storageRef.child(imageFileName)
+
+        // Sube el array de bytes
+        imageRef.putBytes(imageData).await()
+        return imageRef.downloadUrl.await().toString()
+    }
+
+    /**
+     * Sube una imagen de perfil a Firebase Storage.
+     * (Asumimos que la imagen de perfil también se optimiza antes de llegar aquí)
+     * @param imageData Los datos de la imagen como ByteArray.
+     * @param userId El UID del usuario.
+     * @return La URL de descarga de la imagen.
+     */
+    suspend fun uploadProfileImageBytes(imageData: ByteArray, userId: String): String {
+        val imageFileName = "profile_images/${userId}/${UUID.randomUUID()}.jpg"
+        val imageRef = storageRef.child(imageFileName)
+
+        imageRef.putBytes(imageData).await()
+        return imageRef.downloadUrl.await().toString()
+    }
+
+    // El resto de tus métodos (uploadImage, deleteImage, etc.) pueden permanecer
+    // o puedes refactorizarlos para que todos usen bytes. Por ahora, añadimos el nuevo.
+
+    suspend fun deleteImage(imageUrl: String): Boolean {
+        return try {
+            firebaseStorage.getReferenceFromUrl(imageUrl).delete().await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    // Mantenemos este método por si lo usas en otro lado, pero para los spots
+    // ahora usaremos 'uploadImageBytes'
     suspend fun uploadImage(imageUri: Uri, userId: String): String? {
         return try {
             val imageFileName = "spots/${userId}/${UUID.randomUUID()}" // Ruta en Storage
@@ -34,27 +73,6 @@ class ImageStorageRepository @Inject constructor(
         }
     }
 
-    /**
-     * Elimina una imagen de Firebase Storage.
-     * @param imageUrl La URL de descarga de la imagen a eliminar.
-     * @return true si la eliminación fue exitosa, false en caso de error.
-     */
-    suspend fun deleteImage(imageUrl: String): Boolean {
-        return try {
-            firebaseStorage.getReferenceFromUrl(imageUrl).delete().await()
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
-    }
-
-    /**
-     * Sube una imagen de perfil a Firebase Storage.
-     * @param userId El UID del usuario para crear una ruta única.
-     * @param imageUri La URI local de la imagen a subir.
-     * @return La URL de descarga pública de la imagen subida.
-     */
     suspend fun uploadProfileImage(userId: String, imageUri: Uri): String {
         // Creamos una referencia única para la imagen, ej: profile_images/USER_ID/RANDOM_UUID.jpg
         val fileName = "${UUID.randomUUID()}.jpg"

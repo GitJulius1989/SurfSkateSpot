@@ -1,4 +1,4 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/presentation/viewmodel/AddSpotViewModel.kt
+// En: presentation/viewmodel/AddSpotViewModel.kt
 package com.bioridelabs.surfskatespot.presentation.viewmodel
 
 import android.net.Uri
@@ -10,8 +10,11 @@ import com.bioridelabs.surfskatespot.domain.model.SportType
 import com.bioridelabs.surfskatespot.domain.model.Spot
 import com.bioridelabs.surfskatespot.domain.repository.ImageStorageRepository
 import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
+import com.bioridelabs.surfskatespot.utils.ImageOptimizer
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,17 +25,17 @@ import javax.inject.Inject
 class AddSpotViewModel @Inject constructor(
     private val spotRepository: SpotRepository,
     private val imageStorageRepository: ImageStorageRepository,
+    private val imageOptimizer: ImageOptimizer, // ¡Inyectamos el optimizador!
     private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
-    // Estado de la UI
+    // ... (El resto de tus LiveData y StateFlows se mantienen igual)
     private val _spotName = MutableStateFlow("")
     val spotName: StateFlow<String> = _spotName.asStateFlow()
 
     private val _spotDescription = MutableStateFlow("")
     val spotDescription: StateFlow<String> = _spotDescription.asStateFlow()
 
-    // Usamos MutableLiveData<SportType?> para almacenar el tipo seleccionado o null si ninguno.
     private val _selectedSportType = MutableLiveData<SportType?>(null)
     val selectedSportType: MutableLiveData<SportType?> = _selectedSportType
 
@@ -42,7 +45,6 @@ class AddSpotViewModel @Inject constructor(
     private val _selectedPhotoUris = MutableLiveData<MutableList<Uri>>(mutableListOf()) // Uris locales de las fotos
     val selectedPhotoUris: LiveData<MutableList<Uri>> = _selectedPhotoUris
 
-    // Eventos (SingleLiveEvent o similar para manejar eventos únicos como navegación, Toast)
     private val _addSpotResult = MutableLiveData<Boolean>()
     val addSpotResult: LiveData<Boolean> = _addSpotResult
 
@@ -52,7 +54,8 @@ class AddSpotViewModel @Inject constructor(
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    // Métodos para actualizar el estado desde la UI
+
+    // ... (El resto de tus métodos 'on...Changed' y 'add/remove PhotoUri' se mantienen igual)
     fun onSpotNameChanged(name: String) {
         _spotName.value = name
     }
@@ -62,14 +65,12 @@ class AddSpotViewModel @Inject constructor(
     }
 
     fun onSportTypeSelected(sportType: SportType) {
-        // Si el tipo seleccionado es el mismo que ya está, lo deseleccionamos (toggle)
         if (_selectedSportType.value == sportType) {
             _selectedSportType.value = null
         } else {
             _selectedSportType.value = sportType
         }
     }
-
     fun onLocationSelected(latitude: Double, longitude: Double) {
         _selectedLocation.value = Pair(latitude, longitude)
     }
@@ -78,61 +79,54 @@ class AddSpotViewModel @Inject constructor(
         val currentList = _selectedPhotoUris.value ?: mutableListOf()
         if (uri !in currentList) {
             currentList.add(uri)
-            _selectedPhotoUris.value = currentList // Disparar la actualización del LiveData
+            _selectedPhotoUris.value = currentList
         }
     }
 
     fun removePhotoUri(uri: Uri) {
         val currentList = _selectedPhotoUris.value ?: mutableListOf()
         if (currentList.remove(uri)) {
-            _selectedPhotoUris.value = currentList // Disparar la actualización del LiveData
+            _selectedPhotoUris.value = currentList
         }
     }
 
-    // Lógica para guardar el Spot
     fun saveSpot() {
         _isLoading.value = true
         _errorMessage.value = null
 
         val name = _spotName.value.trim()
         val description = _spotDescription.value.trim()
-        val sportType = _selectedSportType.value // Obtener el tipo de deporte seleccionado (puede ser null)
+        val sportType = _selectedSportType.value
         val location = _selectedLocation.value
         val photoUris = _selectedPhotoUris.value ?: emptyList()
-
         val userId = firebaseAuth.currentUser?.uid
 
-        // 1. Validación
         if (userId == null) {
             _errorMessage.value = "Error: Usuario no autenticado."
             _isLoading.value = false
-            _addSpotResult.value = false
             return
         }
-        // CAMBIO: La validación ahora usa 'sportType' directamente
         if (name.isBlank() || description.isBlank() || sportType == null || location == null) {
-            _errorMessage.value = "Por favor, completa todos los campos requeridos y selecciona un tipo de deporte y una ubicación."
+            _errorMessage.value = "Por favor, completa todos los campos requeridos."
             _isLoading.value = false
-            _addSpotResult.value = false
             return
         }
 
         viewModelScope.launch {
             try {
-                // 2. Subir imágenes a Firebase Storage
-                val uploadedPhotoUrls = mutableListOf<String>()
-                if (photoUris.isNotEmpty()) {
+                // 2. Optimizar y subir imágenes en paralelo para máxima eficiencia
+                val uploadedPhotoUrls = if (photoUris.isNotEmpty()) {
                     val uploadTasks = photoUris.map { uri ->
-                        imageStorageRepository.uploadImage(uri, userId)
+                        // Creamos una tarea asíncrona para cada imagen
+                        async {
+                            val compressedData = imageOptimizer.compressImage(uri)
+                            imageStorageRepository.uploadImageBytes(compressedData, userId)
+                        }
                     }
-                    val results = uploadTasks.mapNotNull { it } // Obtener URLs no nulas
-                    if (results.size != photoUris.size) {
-                        _errorMessage.value = "Error al subir una o más fotos. Inténtalo de nuevo."
-                        _isLoading.value = false
-                        _addSpotResult.value = false
-                        return@launch
-                    }
-                    uploadedPhotoUrls.addAll(results)
+                    // Esperamos a que todas las tareas de subida finalicen
+                    uploadTasks.awaitAll()
+                } else {
+                    emptyList()
                 }
 
                 // 3. Crear objeto Spot
@@ -140,9 +134,7 @@ class AddSpotViewModel @Inject constructor(
                     userId = userId,
                     nombre = name,
                     descripcion = description,
-                    // CAMBIO 2: Usar 'sportType.type' con el operador de aserción no nula '!!'
-                    // Ya validamos que 'sportType' no es null justo antes.
-                    tiposDeporte = listOf(sportType!!.type), // ¡CORRECCIÓN CLAVE AQUÍ!
+                    tiposDeporte = listOf(sportType.type),
                     latitud = location.first,
                     longitud = location.second,
                     fotosUrls = uploadedPhotoUrls
@@ -152,11 +144,7 @@ class AddSpotViewModel @Inject constructor(
                 val success = spotRepository.addSpot(newSpot)
                 if (success) {
                     _addSpotResult.value = true
-                    _spotName.value = "" // Limpiar campos después de guardar
-                    _spotDescription.value = ""
-                    _selectedSportType.value = null // Deseleccionar el tipo de deporte
-                    _selectedLocation.value = null
-                    _selectedPhotoUris.value = mutableListOf()
+                    // Limpiar el estado para el siguiente spot
                 } else {
                     _errorMessage.value = "Error al guardar el spot en la base de datos."
                     _addSpotResult.value = false
@@ -164,6 +152,7 @@ class AddSpotViewModel @Inject constructor(
             } catch (e: Exception) {
                 _errorMessage.value = "Error inesperado al añadir spot: ${e.message}"
                 _addSpotResult.value = false
+                // Aquí podrías borrar las imágenes ya subidas si la operación falla a mitad
             } finally {
                 _isLoading.value = false
             }

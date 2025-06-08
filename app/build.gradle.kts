@@ -1,4 +1,4 @@
-// app/build.gradle.kts
+// Reemplaza el contenido de tu app/build.gradle.kts con esto:
 
 plugins {
     alias(libs.plugins.android.application)
@@ -6,13 +6,12 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.google.services)
-    id("androidx.navigation.safeargs.kotlin")
-
+    alias(libs.plugins.navigation.safeargs.kotlin)
 }
 
 android {
     namespace = "com.bioridelabs.surfskatespot"
-    compileSdk = 35
+    compileSdk = 34 // Usar la última SDK estable, no una preview
 
     defaultConfig {
         applicationId = "com.bioridelabs.surfskatespot"
@@ -20,13 +19,13 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            // proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
@@ -42,61 +41,59 @@ android {
     buildFeatures {
         viewBinding = true
         dataBinding = true
+        buildConfig = true // Habilitado para que SSSApp.kt funcione
     }
-
 }
 
 dependencies {
-    // AndroidX & Material (usando alias de libs.versions.toml)
+    // AndroidX & Material
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.activity)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.fragment.ktx) // Importante para FragmentContainerView
+    implementation(libs.androidx.splashscreen)
 
-    // Lifecycle & Navigation (usando alias de libs.versions.toml)
+    // Lifecycle & Navigation
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
 
-    // Firebase (Auth, Firestore, Storage, Analytics) (usando alias y plataforma de libs.versions.toml)
+    // Firebase (usando la Bill of Materials - BoM)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.analytics.ktx)
-    implementation("androidx.activity:activity-ktx:1.9.0")
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation(libs.firebase.appcheck.playintegrity)
+    debugImplementation(libs.firebase.appcheck.debug) // Correcto: solo para builds de depuración
 
-
-    // Google Sign-In (usando alias de libs.versions.toml)
+    // Google Services
     implementation(libs.play.services.auth)
-
-    // Coroutines + Play Services (usando alias de libs.versions.toml)
-    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+
+    // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 
-    // Volley (si lo necesitas y está en libs.versions.toml)
-    implementation(libs.volley)
-
-    // Hilt (usando alias de libs.versions.toml)
+    // Hilt (Inyección de Dependencias)
     implementation(libs.dagger.hilt.android)
-    implementation(libs.androidx.annotation)
     kapt(libs.dagger.hilt.compiler)
 
-    // Glide (usando alias de libs.versions.toml) # <-- ¡CAMBIOS AQUÍ!
+    // Glide (Carga de Imágenes)
     implementation(libs.glide)
     kapt(libs.glide.compiler)
 
-    // Test (usando alias de libs.versions.toml)
+    // Otros
+    implementation(libs.volley)
+    implementation(libs.androidx.annotation)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    // Splash
-    implementation(libs.androidx.core.splashscreen)
 }

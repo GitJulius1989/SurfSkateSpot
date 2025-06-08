@@ -1,118 +1,105 @@
-# gradle/libs.versions.toml
+# Reemplaza el contenido de tu gradle/libs.versions.toml con esto:
 
 [versions]
-# Android Gradle Plugin
-agp = "8.6.1"
-
-# Kotlin Gradle Plugin. ¡ACTUALIZADO!
-coreSplashscreen = "1.0.1"
-kotlin = "1.9.23"
-
-# AndroidX Core, JUnit, Espresso
-coreKtx = "1.16.0"
-junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-
-# AndroidX UI, Material Design
-appcompat = "1.7.1"
-material = "1.12.0"
-activity = "1.10.1" # Tu versión actual para androidx.activity
-constraintlayout = "2.2.0"
-annotation = "1.9.1"
-
-# AndroidX Lifecycle (versión unificada para livedata y viewmodel)
-lifecycle = "2.8.7"
-
-# AndroidX Navigation.
-navigation = "2.7.7" # Versión de Navigation Component
-
-# Firebase Bill of Materials (BoM).
-firebaseBom = "33.1.1"
-
-# Dagger Hilt.
-hilt = "2.51.1" # ¡La última estable de Dagger Hilt!
-
-# Google Services Plugin.
+# ===== PLUGINS =====
+androidGradlePlugin = "8.4.1" # Versión estable y reciente de AGP
+kotlin = "1.9.22" # Versión de Kotlin muy estable y compatible
+hilt = "2.51.1" # Última versión estable de Hilt
 googleServices = "4.4.2"
+navigationSafeArgs = "2.7.7"
 
-# Google Play Services (Auth, Maps, Location).
+# ===== DEPENDENCIAS =====
+# AndroidX
+androidxCore = "1.13.1"
+appCompat = "1.7.0"
+activityKtx = "1.9.0"
+fragmentKtx = "1.8.0"
+constraintLayout = "2.1.4"
+lifecycle = "2.8.1"
+navigation = "2.7.7"
+splashscreen = "1.0.1"
+annotation = "1.8.0"
+
+# Google
+material = "1.12.0"
 playServicesAuth = "21.2.0"
-playServicesMaps = "19.1.0" # Tu versión actual. Mantén esta si funciona.
+playServicesMaps = "18.2.0"
 playServicesLocation = "21.3.0"
-coroutinesPlayServices = "1.8.1" # Para kotlinx-coroutines-play-services
 
-# Volley (si lo necesitas).
+# Firebase
+firebaseBom = "33.1.1"
+firebaseAppCheck = "18.0.0"
+
+# Coroutines
+coroutines = "1.8.0"
+
+# Hilt (ya definido arriba)
+
+# Otros
+glide = "4.16.0"
 volley = "1.2.1"
 
-#Glide - imagenes
-glide = "4.16.0"
-
-# Corroutines
-kotlinx-coroutines = "1.8.1"
-
+# Testing
+junit = "4.13.2"
+androidxJunit = "1.1.5"
+espresso = "3.5.1"
 
 [libraries]
 # AndroidX & Material
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
-google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appCompat" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
+androidx-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
+google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
-# Lifecycle (usando la versión unificada)
+# Lifecycle & Navigation
 androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
-
-# Navigation.
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 
-# Firebase
+# Firebase (usa la Bill of Materials)
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" } # Version is managed by BoM
-firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx" } # Version is managed by BoM
-firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx" } # Version is managed by BoM
-firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" } # Version is managed by BoM
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
+firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx" }
+firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity", version.ref = "firebaseAppCheck" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug", version.ref = "firebaseAppCheck" }
 
-# Google Sign-In
+# Google Services
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
-
-# Coroutines + Play Services
-kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
-# Volley
-volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
+# Coroutines
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
+
+# Hilt
+dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" } # Corregido: hilt-android-compiler
 
 # Glide
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
 
-# Corroutines
-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+# Otros
+volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 
-# Hilt
-dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
-
-# Test
+# Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" } # KAPT usa la misma versión que el plugin de Kotlin
-
-# Hilt (Dagger) plugin.
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
-# Google Services (Firebase) plugin.
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+navigation-safeargs-kotlin = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigationSafeArgs" }
