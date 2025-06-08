@@ -54,6 +54,7 @@ class LoginFragment : Fragment() {
      * @param savedInstanceState Si no es nulo, este fragmento está siendo recreado a partir de un estado guardado previamente.
      * @return La vista raíz del diseño del fragmento.
      */
+    // Infla la vista del fragmento de login
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -70,6 +71,7 @@ class LoginFragment : Fragment() {
      * @param view La vista devuelta por onCreateView(LayoutInflater, ViewGroup, Bundle).
      * @param savedInstanceState Si no es nulo, este fragmento está siendo recreado a partir de un estado guardado previamente.
      */
+    // Inicializa la lógica de la pantalla
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -202,6 +204,7 @@ class LoginFragment : Fragment() {
      * Se llama cuando la vista del fragmento está siendo destruida.
      * Se utiliza para limpiar la referencia al binding y evitar fugas de memoria.
      */
+    // Limpia el binding del fragmento
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

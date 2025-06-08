@@ -34,18 +34,18 @@ class SelectLocationFragment : Fragment(), OnMapReadyCallback {
         const val BUNDLE_KEY_LATITUDE = "latitude"
         const val BUNDLE_KEY_LONGITUDE = "longitude"
     }
-
+    // Infla el selector de ubicación
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSelectLocationBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+    // Configura el mapa tras crear la vista
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
-
+    // Mapa listo para seleccionar ubicación
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         // Ubicación inicial por defecto (Santander, una buena elección 🌊)
@@ -72,7 +72,7 @@ class SelectLocationFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
-
+    // Limpia el binding al cerrar el fragmento
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

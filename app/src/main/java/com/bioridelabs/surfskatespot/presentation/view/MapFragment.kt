@@ -56,7 +56,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private val args: MapFragmentArgs by navArgs() // Para acceder a los argumentos del mapa
     private var currentFavoriteSpotIds: Set<String> = emptySet() // Para guardar IDs de favoritos
-
+    // Infla la vista del mapa
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -64,7 +64,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
         return view
     }
-
+    // Configura el mapa una vez creada la vista
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -75,7 +75,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
-
+    // Se llama cuando el mapa está listo
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         setupMap()
@@ -97,7 +97,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
-
+    // Configura parámetros iniciales del mapa
     private fun setupMap() {
         map?.let { googleMap ->
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -124,7 +124,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
-
+    // Obtiene la ubicación del usuario
     private fun getUserLocation() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
@@ -143,7 +143,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
-
+    // Alterna entre vista normal y satélite
     private fun setupLayerToggleButton() {
         layerToggleButton.setOnClickListener {
             isSatelliteView = !isSatelliteView
@@ -156,6 +156,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     //Para filtrar spots, en la v2
+    // Muestra u oculta los spots en el mapa
     private fun setupSpotsVisibilityFab() {
         spotsVisibilityFab.setOnClickListener {
             Toast.makeText(context, "Funcionalidad de filtro de spots", Toast.LENGTH_SHORT).show()
@@ -163,6 +164,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     // Nueva función para dibujar los spots en el mapa
+    // Dibuja los marcadores de spots
     private fun drawSpotsOnMap(spots: List<Spot>) {
         map?.clear() // Limpiar marcadores existentes
         spots.forEach { spot ->
@@ -182,6 +184,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     // Modificar getSpotIcon para que reciba el estado de favorito
+    // Obtiene el icono correspondiente al spot
     private fun getSpotIcon(spot: Spot, isFavorite: Boolean): BitmapDescriptor {
         // Determinar el icono base según el tipo de deporte
         val baseIconResId: Int = when {
@@ -198,8 +201,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         // Usar BitmapHelper para crear el BitmapDescriptor a partir del VectorDrawable
         return BitmapHelper.vectorToBitmap(requireContext(), baseIconResId, tintColorResId)
     }
-
-
+    // Construye el texto que acompaña al marcador
     private fun buildMarkerSnippet(spot: Spot): String {
         val types = spot.tiposDeporte.joinToString(", ")
         val ratingText = if (spot.totalRatings > 0) {
@@ -209,7 +211,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
         return "Tipos: $types\n$ratingText\n${spot.descripcion}"
     }
-
+    // Respuesta de la solicitud de permisos
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {

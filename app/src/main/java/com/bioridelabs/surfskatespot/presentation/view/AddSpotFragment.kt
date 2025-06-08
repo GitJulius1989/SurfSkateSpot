@@ -73,8 +73,7 @@ class AddSpotFragment : Fragment() {
                 addSpotViewModel.onLocationSelected(43.46, -3.81) // Simular una ubicación por ahora
             }
         }
-
-
+    // Infla el layout y crea el binding de la vista
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -82,7 +81,7 @@ class AddSpotFragment : Fragment() {
         _binding = FragmentAddSpotBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+    // Configura la vista una vez creada
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -98,7 +97,7 @@ class AddSpotFragment : Fragment() {
         setupListeners()
         observeViewModel()
     }
-
+    // Inicializa los componentes de la interfaz
     private fun setupUI() {
         // Configurar RecyclerView para fotos
         photoAdapter = AddPhotoAdapter { uri ->
@@ -116,7 +115,7 @@ class AddSpotFragment : Fragment() {
         }
         binding.rvSelectedPhotos.visibility = View.GONE // Ocultar al inicio si no hay fotos
     }
-
+    // Configura los listeners de la pantalla
     private fun setupListeners() {
         // TextChangedListeners para campos de texto (usando StateFlows)
         viewLifecycleOwner.lifecycleScope.launch {
@@ -157,7 +156,7 @@ class AddSpotFragment : Fragment() {
             addSpotViewModel.saveSpot()
         }
     }
-
+    // Observa los LiveData del ViewModel
     private fun observeViewModel() {
         // Observar ubicación seleccionada para actualizar la UI
         addSpotViewModel.selectedLocation.observe(viewLifecycleOwner) { location ->
@@ -192,7 +191,7 @@ class AddSpotFragment : Fragment() {
             binding.btnSaveSpot.isEnabled = !isLoading // Deshabilitar botón al cargar
         }
     }
-
+    // Solicita permisos necesarios para la galería
     private fun checkAndRequestGalleryPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Android 13+ (API 33) usa READ_MEDIA_IMAGES
@@ -202,7 +201,7 @@ class AddSpotFragment : Fragment() {
             requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
     }
-
+    // Libera el binding para evitar fugas de memoria
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

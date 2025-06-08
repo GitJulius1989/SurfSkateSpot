@@ -15,14 +15,18 @@ import com.bioridelabs.surfskatespot.domain.model.Spot
 
 // Adaptador para la RecyclerView que muestra una lista de spots.
 // Utiliza ListAdapter para manejar actualizaciones de la lista de manera eficiente.
+// Adaptador para listar los spots
 class SpotAdapter(private val onItemClick: (String) -> Unit) :
     ListAdapter<Spot, SpotAdapter.SpotViewHolder>(SpotDiffCallback()) {
 
     // ViewHolder que mantiene las vistas de un elemento de la lista.
+        // ViewHolder para cada spot
+    // ViewHolder para cada spot
     class SpotViewHolder(private val binding: ItemSpotBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         // Método para enlazar un objeto Spot con las vistas del ViewHolder.
+        // Asocia los datos del spot a la vista
         fun bind(spot: Spot, onItemClick: (String) -> Unit) {
             binding.tvSpotName.text = spot.nombre
             // Si tu Spot tiene una lista de tipos (List<String>), conviértela a String
@@ -64,6 +68,7 @@ class SpotAdapter(private val onItemClick: (String) -> Unit) :
     }
 
     // Callback para calcular las diferencias entre dos listas de spots.
+        // Calcula diferencias entre listas
     class SpotDiffCallback : DiffUtil.ItemCallback<Spot>() {
         override fun areItemsTheSame(oldItem: Spot, newItem: Spot): Boolean {
             // Los ítems son los mismos si tienen el mismo ID de spot
@@ -78,6 +83,7 @@ class SpotAdapter(private val onItemClick: (String) -> Unit) :
     }
 
     // Se llama cuando RecyclerView necesita un nuevo ViewHolder.
+    // Crea un nuevo ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpotViewHolder {
         // Inflar el layout del ítem usando View Binding
         val binding = ItemSpotBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -85,6 +91,7 @@ class SpotAdapter(private val onItemClick: (String) -> Unit) :
     }
 
     // Se llama para mostrar los datos en una posición específica.
+    // Enlaza el ViewHolder con un spot
     override fun onBindViewHolder(holder: SpotViewHolder, position: Int) {
         // Obtener el spot en la posición actual
         val spot = getItem(position)

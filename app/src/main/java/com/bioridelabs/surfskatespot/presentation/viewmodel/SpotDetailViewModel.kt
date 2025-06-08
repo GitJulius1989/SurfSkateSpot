@@ -40,8 +40,7 @@ class SpotDetailViewModel @Inject constructor(
 
     private val _deleteSpotResult = MutableLiveData<Boolean>()
     val deleteSpotResult: LiveData<Boolean> = _deleteSpotResult
-
-
+    // Carga los datos de un spot concreto
     fun loadSpotDetails(spotId: String) {
         _isLoading.value = true
         _errorMessage.value = null
@@ -67,7 +66,7 @@ class SpotDetailViewModel @Inject constructor(
     }
 
     // ... (El resto de métodos: checkIfFavorite, toggleFavorite, deleteSpot y clearErrorMessage se mantienen igual, ya son correctos)
-
+    // Verifica si el spot es favorito del usuario
     private fun checkIfFavorite(spotId: String) {
         val currentUserId = firebaseAuth.currentUser?.uid
         if (currentUserId == null) {
@@ -85,7 +84,7 @@ class SpotDetailViewModel @Inject constructor(
             }
         }
     }
-
+    // Añade o elimina el spot de favoritos
     fun toggleFavorite(spotId: String, currentIsFavorite: Boolean) {
         val currentUserId = firebaseAuth.currentUser?.uid
         if (currentUserId == null) {
@@ -110,7 +109,7 @@ class SpotDetailViewModel @Inject constructor(
             }
         }
     }
-
+    // Elimina el spot de la base de datos
     fun deleteSpot(spotId: String) {
         _isLoading.value = true
         _errorMessage.value = null
@@ -141,7 +140,7 @@ class SpotDetailViewModel @Inject constructor(
             }
         }
     }
-
+    // Limpia cualquier mensaje de error
     fun clearErrorMessage() {
         _errorMessage.value = null
     }

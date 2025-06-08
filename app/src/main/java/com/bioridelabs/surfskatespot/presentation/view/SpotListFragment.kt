@@ -30,7 +30,7 @@ class SpotListFragment : Fragment() {
 
     // Declaramos el adaptador de la RecyclerView
     private lateinit var spotAdapter: SpotAdapter
-
+    // Infla la lista de spots
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,7 +38,7 @@ class SpotListFragment : Fragment() {
         _binding = FragmentSpotListBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+    // Configura la RecyclerView y observa datos
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -53,7 +53,7 @@ class SpotListFragment : Fragment() {
         // pero podrías tener un refresh button aquí.
         // mainViewModel.loadSpots()
     }
-
+    // Prepara la lista de elementos
     private fun setupRecyclerView() {
         spotAdapter = SpotAdapter { spotId ->
             // Implementar la navegación a SpotDetailFragment al hacer clic en un spot
@@ -68,7 +68,7 @@ class SpotListFragment : Fragment() {
             adapter = spotAdapter
         }
     }
-
+    // Observa los datos del ViewModel
     private fun observeViewModel() {
         mainViewModel.spots.observe(viewLifecycleOwner) { spots ->
             // Cuando la lista de spots cambia en el ViewModel, actualiza el adaptador
@@ -94,7 +94,7 @@ class SpotListFragment : Fragment() {
             }
         }
     }
-
+    // Libera el binding del fragmento
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

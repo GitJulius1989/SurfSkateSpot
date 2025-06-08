@@ -33,6 +33,7 @@ class SettingsFragment : Fragment() {
         const val KEY_LANGUAGE = "language_preference"
         const val KEY_HIGH_CONTRAST = "high_contrast_preference"
     }
+    // Infla el fragmento de ajustes
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,7 +41,7 @@ class SettingsFragment : Fragment() {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+    // Configura las opciones de la pantalla
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -49,7 +50,7 @@ class SettingsFragment : Fragment() {
         setupLanguageSpinner()
         setupHighContrastCheckbox()
     }
-
+    // Configura el selector de idioma
     private fun setupLanguageSpinner() {
         val languages = resources.getStringArray(R.array.languages_array)
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, languages)
@@ -89,7 +90,7 @@ class SettingsFragment : Fragment() {
             }
         }
     }
-
+    // Aplica el idioma elegido
     private fun applyLanguage(languageCode: String) {
         val locale = Locale(languageCode)
         Locale.setDefault(locale) // Establecer el locale predeterminado
@@ -110,7 +111,7 @@ class SettingsFragment : Fragment() {
             requireActivity().recreate() // Esto recrea la actividad, aplicando el nuevo idioma
         }
     }
-
+    // Configura la opción de alto contraste
     private fun setupHighContrastCheckbox() {
         val isHighContrastEnabled = sharedPreferences.getBoolean(KEY_HIGH_CONTRAST, false)
         binding.checkboxHighContrast.isChecked = isHighContrastEnabled
@@ -134,7 +135,7 @@ class SettingsFragment : Fragment() {
 //            requireActivity().recreate()
 //        }
 //    }
-
+    // Libera recursos del binding
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

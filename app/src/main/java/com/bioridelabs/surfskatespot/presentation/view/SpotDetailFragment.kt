@@ -28,8 +28,7 @@ class SpotDetailFragment : Fragment() {
     private val args: SpotDetailFragmentArgs by navArgs() // Descomentar esta línea
 
     private var currentSpotId: String? = null
-
-
+    // Infla la vista con el detalle del spot
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,7 +36,7 @@ class SpotDetailFragment : Fragment() {
         _binding = FragmentSpotDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+    // Carga la información del spot
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -104,7 +103,7 @@ class SpotDetailFragment : Fragment() {
         // binding.btnAddComment.setOnClickListener { /* Abrir diálogo para añadir comentario */ }
         // binding.btnAddRating.setOnClickListener { /* Abrir diálogo para añadir valoración */ }
     }
-
+    // Observa los datos del ViewModel
     private fun observeViewModel() {
         spotDetailViewModel.spotDetails.observe(viewLifecycleOwner) { spot ->
             spot?.let {
@@ -151,7 +150,7 @@ class SpotDetailFragment : Fragment() {
             // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
     }
-
+    // Configura las acciones de la pantalla
     private fun setupListeners() {
         binding.checkboxFavorite.setOnCheckedChangeListener { _, isChecked ->
             // Cuando el usuario cambia el estado del checkbox, actualiza el ViewModel
@@ -165,7 +164,7 @@ class SpotDetailFragment : Fragment() {
         // binding.btnAddComment.setOnClickListener { /* Abrir diálogo para añadir comentario */ }
         // binding.btnAddRating.setOnClickListener { /* Abrir diálogo para añadir valoración */ }
     }
-
+    // Libera el binding del fragmento
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -47,7 +47,7 @@ class UserProfileFragment : Fragment() {
             // El usuario cerró el selector sin elegir nada.
         }
     }
-
+    // Infla la vista del perfil de usuario
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,7 +55,7 @@ class UserProfileFragment : Fragment() {
         _binding = FragmentUserProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+    // Configura la vista y observadores
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -66,11 +66,12 @@ class UserProfileFragment : Fragment() {
 
     // Es buena práctica llamar a la carga de datos en onResume para refrescar
     // si el usuario vuelve a este fragmento.
+    // Recarga los datos del usuario al volver
     override fun onResume() {
         super.onResume()
         viewModel.loadUserProfile()
     }
-
+    // Configura la lista de favoritos
     private fun setupRecyclerView() {
         favoritesAdapter = SpotAdapter { spotId ->
             // Navegar al detalle del spot desde la lista de favoritos
@@ -82,7 +83,7 @@ class UserProfileFragment : Fragment() {
             adapter = favoritesAdapter
         }
     }
-
+    // Define los manejadores de clic
     private fun setupClickListeners() {
         binding.editProfileImageFab.setOnClickListener {
             // Lanzar el Photo Picker
@@ -98,7 +99,7 @@ class UserProfileFragment : Fragment() {
             findNavController().navigate(R.id.action_global_loginFragment)
         }
     }
-
+    // Observa el estado de la interfaz
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -108,7 +109,8 @@ class UserProfileFragment : Fragment() {
             }
         }
     }
-
+    // Actualiza la UI según el estado
+    // Muestra u oculta vistas según el login
     private fun updateUiForState(state: UserProfileState) {
         // Primero, gestionamos la visibilidad general
         binding.progressBar.visibility = if (state is UserProfileState.Loading) View.VISIBLE else View.GONE
@@ -145,7 +147,7 @@ class UserProfileFragment : Fragment() {
         binding.emailTextView.visibility = if (isLoggedIn) View.VISIBLE else View.GONE
         binding.loginRegisterButton.visibility = if (isLoggedIn) View.GONE else View.VISIBLE
     }
-
+    // Libera el binding del fragmento
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

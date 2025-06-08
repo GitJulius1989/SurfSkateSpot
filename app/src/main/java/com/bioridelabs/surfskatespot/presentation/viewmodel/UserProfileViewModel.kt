@@ -34,7 +34,7 @@ class UserProfileViewModel @Inject constructor(
     init {
         loadUserProfile()
     }
-
+    // Obtiene los datos del usuario
     fun loadUserProfile() {
         viewModelScope.launch {
             _uiState.value = UserProfileState.Loading
@@ -66,7 +66,7 @@ class UserProfileViewModel @Inject constructor(
             }
         }
     }
-
+    // Sube la imagen de perfil del usuario
     fun uploadProfileImage(imageUri: Uri) {
         viewModelScope.launch {
             val userId = auth.currentUser?.uid ?: return@launch
@@ -83,7 +83,7 @@ class UserProfileViewModel @Inject constructor(
             }
         }
     }
-
+    // Cierra la sesión del usuario
     fun logout() {
         auth.signOut()
         _uiState.value = UserProfileState.LoggedOut

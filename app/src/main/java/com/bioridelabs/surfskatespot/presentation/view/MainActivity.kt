@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var sharedPreferences: SharedPreferences // <-- ¡Añadir esta declaración!
-
+    // Punto de entrada principal de la actividad
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
             setTheme(R.style.Theme_SurfSkateSpot)
         }
     }
-
+    // Maneja la navegación hacia arriba
     override fun onSupportNavigateUp(): Boolean {
         return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp()
     }

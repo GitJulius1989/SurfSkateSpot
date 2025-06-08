@@ -23,7 +23,7 @@ class FavoritesFragment : Fragment() {
 
     private val favoritesViewModel: FavoritesViewModel by viewModels() // Usamos el nuevo ViewModel
     private lateinit var spotAdapter: SpotAdapter
-
+    // Infla la vista del fragmento
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -31,14 +31,14 @@ class FavoritesFragment : Fragment() {
         _binding = FragmentSpotListBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+    // Configura la interfaz una vez creada
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
         observeViewModel()
     }
-
+    // Prepara la lista de favoritos
     private fun setupRecyclerView() {
         spotAdapter = SpotAdapter { spotId ->
             val action = FavoritesFragmentDirections.actionFavoritesFragmentToSpotDetailFragment(spotId)
@@ -50,7 +50,7 @@ class FavoritesFragment : Fragment() {
             adapter = spotAdapter
         }
     }
-
+    // Observa los cambios en el ViewModel
     private fun observeViewModel() {
         favoritesViewModel.favoriteSpots.observe(viewLifecycleOwner) { spots ->
             spotAdapter.submitList(spots)
@@ -73,7 +73,7 @@ class FavoritesFragment : Fragment() {
             }
         }
     }
-
+    // Limpia el binding del fragmento
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

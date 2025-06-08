@@ -56,14 +56,15 @@ class AddSpotViewModel @Inject constructor(
 
 
     // ... (El resto de tus métodos 'on...Changed' y 'add/remove PhotoUri' se mantienen igual)
+    // Actualiza el nombre del spot
     fun onSpotNameChanged(name: String) {
         _spotName.value = name
     }
-
+    // Actualiza la descripción del spot
     fun onSpotDescriptionChanged(description: String) {
         _spotDescription.value = description
     }
-
+    // Selecciona o deselecciona un tipo de deporte
     fun onSportTypeSelected(sportType: SportType) {
         if (_selectedSportType.value == sportType) {
             _selectedSportType.value = null
@@ -71,10 +72,11 @@ class AddSpotViewModel @Inject constructor(
             _selectedSportType.value = sportType
         }
     }
+    // Guarda la ubicación elegida
     fun onLocationSelected(latitude: Double, longitude: Double) {
         _selectedLocation.value = Pair(latitude, longitude)
     }
-
+    // Añade una foto a la lista
     fun addPhotoUri(uri: Uri) {
         val currentList = _selectedPhotoUris.value ?: mutableListOf()
         if (uri !in currentList) {
@@ -82,14 +84,14 @@ class AddSpotViewModel @Inject constructor(
             _selectedPhotoUris.value = currentList
         }
     }
-
+    // Elimina una foto de la lista
     fun removePhotoUri(uri: Uri) {
         val currentList = _selectedPhotoUris.value ?: mutableListOf()
         if (currentList.remove(uri)) {
             _selectedPhotoUris.value = currentList
         }
     }
-
+    // Guarda el nuevo spot en la base de datos
     fun saveSpot() {
         _isLoading.value = true
         _errorMessage.value = null
@@ -158,7 +160,7 @@ class AddSpotViewModel @Inject constructor(
             }
         }
     }
-
+    // Limpia el mensaje de error actual
     fun clearErrorMessage() {
         _errorMessage.value = null
     }

@@ -20,18 +20,16 @@ class MainViewModel @Inject constructor(
     private val _spots = MutableLiveData<List<Spot>>()
     val spots: LiveData<List<Spot>> get() = _spots
 
-    // ¡AÑADE ESTAS PROPIEDADES PARA EL ESTADO DE CARGA!
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    // ¡AÑADE ESTAS PROPIEDADES PARA LOS MENSAJES DE ERROR!
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
     init {
         loadSpots()
     }
-
+    // Obtiene la lista completa de spots
     fun loadSpots() {
         _isLoading.value = true // Establecer a true al inicio de la carga
         _errorMessage.value = null // Limpiar cualquier error anterior
@@ -48,7 +46,7 @@ class MainViewModel @Inject constructor(
             }
         }
     }
-    // ¡AÑADE ESTE MÉTODO PARA LIMPIAR EL MENSAJE DE ERROR!
+    // Borra el mensaje de error
     fun clearErrorMessage() {
         _errorMessage.value = null
     }

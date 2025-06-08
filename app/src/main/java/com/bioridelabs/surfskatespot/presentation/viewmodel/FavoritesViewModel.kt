@@ -32,7 +32,7 @@ class FavoritesViewModel @Inject constructor(
     init {
         loadFavoriteSpots()
     }
-
+    // Carga los spots marcados como favoritos
     fun loadFavoriteSpots() {
         _isLoading.value = true
         _errorMessage.value = null
@@ -61,7 +61,7 @@ class FavoritesViewModel @Inject constructor(
             }
         }
     }
-
+    // Elimina el mensaje de error
     fun clearErrorMessage() {
         _errorMessage.value = null
     }

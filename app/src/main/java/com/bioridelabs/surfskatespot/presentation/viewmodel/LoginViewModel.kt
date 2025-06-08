@@ -27,14 +27,14 @@ class LoginViewModel @Inject constructor( // <--- Añade @Inject y el parámetro
     // LiveData para comunicar el resultado del inicio de sesión con Google a la vista
     private val _googleSignInResult = MutableLiveData<Boolean>()
     val googleSignInResult: LiveData<Boolean> get() = _googleSignInResult
-
+    // Inicia sesión con email y contraseña
     fun login(email: String, password: String) {
         viewModelScope.launch {
             val result = userRepository.loginUser(email, password)
             _loginResult.value = result
         }
     }
-
+    // Maneja el inicio de sesión con Google
     fun signInWithGoogle(idToken: String) {
         viewModelScope.launch {
             try {
