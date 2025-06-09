@@ -36,8 +36,7 @@ class AddSpotViewModel @Inject constructor(
     private val _spotDescription = MutableStateFlow("")
     val spotDescription: StateFlow<String> = _spotDescription.asStateFlow()
 
-    private val _selectedSportType = MutableLiveData<SportType?>(null)
-    val selectedSportType: MutableLiveData<SportType?> = _selectedSportType
+    private var selectedSportType: SportType? = null
 
     private val _selectedLocation = MutableLiveData<Pair<Double, Double>?>() // Latitud, Longitud
     val selectedLocation: LiveData<Pair<Double, Double>?> = _selectedLocation
@@ -54,6 +53,11 @@ class AddSpotViewModel @Inject constructor(
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private var spotIdForUpdate: String? = null // Para saber si estamos editando o creando
+
+    private var existingPhotoUrls: List<String> = emptyList()
+
+
 
     // ... (El resto de tus métodos 'on...Changed' y 'add/remove PhotoUri' se mantienen igual)
     fun onSpotNameChanged(name: String) {
@@ -64,13 +68,10 @@ class AddSpotViewModel @Inject constructor(
         _spotDescription.value = description
     }
 
-    fun onSportTypeSelected(sportType: SportType) {
-        if (_selectedSportType.value == sportType) {
-            _selectedSportType.value = null
-        } else {
-            _selectedSportType.value = sportType
-        }
+    fun onSportTypeSelected(sportType: SportType?) {
+        selectedSportType = sportType
     }
+
     fun onLocationSelected(latitude: Double, longitude: Double) {
         _selectedLocation.value = Pair(latitude, longitude)
     }
@@ -96,11 +97,12 @@ class AddSpotViewModel @Inject constructor(
 
         val name = _spotName.value.trim()
         val description = _spotDescription.value.trim()
-        val sportType = _selectedSportType.value
+        val sportType = selectedSportType
         val location = _selectedLocation.value
         val photoUris = _selectedPhotoUris.value ?: emptyList()
         val userId = firebaseAuth.currentUser?.uid
 
+        // --- Validaciones ---
         if (userId == null) {
             _errorMessage.value = "Error: Usuario no autenticado."
             _isLoading.value = false
@@ -114,48 +116,73 @@ class AddSpotViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                // 2. Optimizar y subir imágenes en paralelo para máxima eficiencia
-                val uploadedPhotoUrls = if (photoUris.isNotEmpty()) {
-                    val uploadTasks = photoUris.map { uri ->
-                        // Creamos una tarea asíncrona para cada imagen
-                        async {
-                            val compressedData = imageOptimizer.compressImage(uri)
-                            imageStorageRepository.uploadImageBytes(compressedData, userId)
-                        }
-                    }
-                    // Esperamos a que todas las tareas de subida finalicen
-                    uploadTasks.awaitAll()
-                } else {
-                    emptyList()
-                }
+                // --- Gestión de Imágenes ---
+                // Separamos las nuevas fotos (tipo content://) de las que ya estaban (tipo https://)
+                val newPhotoUris = photoUris.filter { it.scheme != "https" }
+                val remainingOldUrls = photoUris.filter { it.scheme == "https" }.map { it.toString() }
 
-                // 3. Crear objeto Spot
-                val newSpot = Spot(
+                // Subimos solo las imágenes nuevas
+                val newUploadedUrls = newPhotoUris.map { uri ->
+                    async { imageStorageRepository.uploadImage(uri, userId) }
+                }.awaitAll().filterNotNull()
+
+                // Combinamos las URLs de las fotos antiguas que no se eliminaron con las nuevas
+                val allPhotoUrls = remainingOldUrls + newUploadedUrls
+
+                // --- Crear o Actualizar el Objeto Spot ---
+                val spot = Spot(
+                    spotId = spotIdForUpdate, // Será null si es nuevo, o tendrá un ID si se edita
                     userId = userId,
                     nombre = name,
                     descripcion = description,
                     tiposDeporte = listOf(sportType.type),
                     latitud = location.first,
                     longitud = location.second,
-                    fotosUrls = uploadedPhotoUrls
+                    fotosUrls = allPhotoUrls
                 )
 
-                // 4. Guardar Spot en Firestore
-                val success = spotRepository.addSpot(newSpot)
+                // --- Guardar en Firestore ---
+                val success = if (spotIdForUpdate == null) {
+                    spotRepository.addSpot(spot) // Modo CREAR
+                } else {
+                    spotRepository.updateSpot(spot) // Modo ACTUALIZAR
+                }
+
                 if (success) {
                     _addSpotResult.value = true
-                    // Limpiar el estado para el siguiente spot
                 } else {
-                    _errorMessage.value = "Error al guardar el spot en la base de datos."
+                    _errorMessage.value = "Error al guardar el spot."
                     _addSpotResult.value = false
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "Error inesperado al añadir spot: ${e.message}"
+                _errorMessage.value = "Error inesperado: ${e.message}"
                 _addSpotResult.value = false
-                // Aquí podrías borrar las imágenes ya subidas si la operación falla a mitad
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    fun loadSpotForEditing(spotId: String) {
+        spotIdForUpdate = spotId
+        viewModelScope.launch {
+            _isLoading.value = true
+            val spot = spotRepository.getSpot(spotId)
+            spot?.let {
+                _spotName.value = it.nombre
+                _spotDescription.value = it.descripcion
+                onLocationSelected(it.latitud, it.longitud)
+
+                val sportTypeEnum = SportType.fromType(it.tiposDeporte.firstOrNull() ?: "")
+                onSportTypeSelected(sportTypeEnum)
+
+                // Guardamos las fotos existentes
+                existingPhotoUrls = it.fotosUrls
+                // Convertimos las URLs remotas a Uris para mostrarlas en el adaptador
+                // Nota: El adaptador cargará estas URLs directamente con Glide.
+                _selectedPhotoUris.value = it.fotosUrls.map { url -> Uri.parse(url) }.toMutableList()
+            }
+            _isLoading.value = false
         }
     }
 

@@ -15,10 +15,15 @@ import com.bioridelabs.surfskatespot.presentation.viewmodel.SpotDetailViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import android.widget.RatingBar
+import androidx.navigation.fragment.findNavController
 import com.bioridelabs.surfskatespot.R
 import com.bioridelabs.surfskatespot.di.AuthManager
+import com.bioridelabs.surfskatespot.presentation.view.adapter.ImageSliderAdapter
+import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
+import java.util.Locale
 import javax.inject.Inject
+import android.util.Log
 
 
 // Fragmento para mostrar los detalles de un spot específico.
@@ -51,6 +56,24 @@ class SpotDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Comprueba si estamos en modo edición y carga los datos del spot
+        // Después de reconstruir el proyecto, 'args' se resolverá sin problemas.
+        args.spotIdToEdit?.let { spotId ->
+            // Añadimos un Log para depurar y confirmar que el ID llega
+            Log.d("AddSpotFragment", "Modo Edición activado para spotId: $spotId")
+
+            binding.tvAddSpotTitle.text = "Editar Spot" // Cambia el título de la UI
+            addSpotViewModel.loadSpotForEditing(spotId) // Llama al ViewModel
+        }
+
+        // Escucha el resultado que viene de SelectLocationFragment
+        // Esta lógica es para cuando vuelves de seleccionar una ubicación en el mapa
+        parentFragmentManager.setFragmentResultListener(SelectLocationFragment.REQUEST_KEY, viewLifecycleOwner) { key, bundle ->
+            val latitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LATITUDE)
+            val longitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LONGITUDE)
+            addSpotViewModel.onLocationSelected(latitude, longitude)
+        }
+
         // Obtén el ID del spot de los argumentos de navegación
         val spotId = args.spotId // Ahora puedes usar 'args.spotId'
         currentSpotId = spotId // Guardo el ID para usarlo en los listeners
@@ -73,33 +96,6 @@ class SpotDetailFragment : Fragment() {
                 binding.tvSpotName.text = it.nombre         // <-- ¡Aquí se resuelve!
                 binding.tvSpotDescription.text = it.descripcion // <-- ¡Aquí se resuelve!
 
-                // Si usas la versión con 'tipo' y 'fotoUrl' (tu modelo actual)
-                // binding.tvSportTypeLabel.text = "Tipo de deporte: ${it.tipo}"
-                // if (it.fotoUrl != null) {
-                //     // Cargar imagen con Glide o Coil
-                //     // Glide.with(this).load(it.fotoUrl).into(binding.imageViewSpot)
-                // }
-
-                // Si usas la versión mejorada con 'tiposDeporte' y 'fotosUrls'
-                // binding.llSportTypes.removeAllViews() // Limpia vistas anteriores
-                // it.tiposDeporte.forEach { tipo ->
-                //     val chip = Chip(requireContext()).apply { text = tipo }
-                //     binding.llSportTypes.addView(chip)
-                // }
-                // Implementar el carrusel de imágenes con ViewPager2 para 'fotosUrls'
-
-                // Aquí iría la lógica para configurar tu ViewPager2 para las imágenes
-                // y tu RecyclerView para los comentarios, si los tienes.
-
-                // Lógica de visibilidad de botones (editar/eliminar)
-                // val currentUserId = loginViewModel.currentUserId // Necesitarías inyectar FirebaseAuth en LoginViewModel o tener un AuthRepository
-                // if (currentUserId == it.userId) { // Si el usuario actual es el creador
-                //    binding.btnEditSpot.visibility = View.VISIBLE
-                //    binding.btnDeleteSpot.visibility = View.VISIBLE
-                // } else {
-                //    binding.btnEditSpot.visibility = View.GONE
-                //    binding.btnDeleteSpot.visibility = View.GONE
-                // }
             } ?: run {
                 // Si el spot es nulo (no encontrado o error)
                 Toast.makeText(context, "Spot no encontrado o error al cargar.", Toast.LENGTH_LONG).show()
@@ -119,7 +115,7 @@ class SpotDetailFragment : Fragment() {
             // Aquí puedes mostrar/ocultar un ProgressBar
         }
 
-        // Aquí configurarías los listeners para los botones de acción
+        // Aquí configuraría los listeners para los botones de acción
         // binding.btnEditSpot.setOnClickListener { /* Navegar a la pantalla de edición */ }
         // binding.btnDeleteSpot.setOnClickListener { /* Mostrar diálogo de confirmación y eliminar */ }
         // binding.btnAddComment.setOnClickListener { /* Abrir diálogo para añadir comentario */ }
@@ -127,77 +123,115 @@ class SpotDetailFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        // Observador para los detalles del spot
         spotDetailViewModel.spotDetails.observe(viewLifecycleOwner) { spot ->
-            spot?.let {
-                binding.tvSpotName.text = it.nombre
-                binding.tvSpotDescription.text = it.descripcion
+            // Usamos .let para ejecutar el bloque solo si spot no es nulo
+            spot?.let { currentSpot ->
+                // Guardamos el ID del spot actual para usarlo en los listeners
+                currentSpotId = currentSpot.spotId
 
-                // Aquí iría la lógica para configurar tu ViewPager2 para las imágenes
-                // y tu RecyclerView para los comentarios, si los tienes.
+                // Rellenar datos básicos
+                binding.tvSpotName.text = currentSpot.nombre
+                binding.tvSpotDescription.text = currentSpot.descripcion
 
-                // Lógica de visibilidad de botones (editar/eliminar)
-                // Implementar después de refactorizar UserRepository y obtener el UID actual.
-                // val currentUserId = firebaseAuth.currentUser?.uid // Si lo tienes directamente en el fragment
-                // if (currentUserId == it.userId) {
-                //    binding.btnEditSpot.visibility = View.VISIBLE
-                //    binding.btnDeleteSpot.visibility = View.VISIBLE
-                // } else {
-                //    binding.btnEditSpot.visibility = View.GONE
-                //    binding.btnDeleteSpot.visibility = View.GONE
-                // }
-            } ?: run {
-                Toast.makeText(context, "Spot no encontrado o error al cargar.", Toast.LENGTH_LONG).show()
-                // Puedes navegar de vuelta o mostrar un mensaje de error
+                // Configurar la galería de imágenes
+                if (currentSpot.fotosUrls.isNotEmpty()) {
+                    binding.imageSlider.adapter = ImageSliderAdapter(currentSpot.fotosUrls)
+                    binding.imageSlider.visibility = View.VISIBLE
+                } else {
+                    binding.imageSlider.visibility = View.GONE
+                }
+
+                // Generar dinámicamente los tipos de deporte como Chips
+                binding.llSportTypes.removeAllViews()
+                currentSpot.tiposDeporte.forEach { sportType ->
+                    val chip = Chip(requireContext()).apply { text = sportType }
+                    binding.llSportTypes.addView(chip)
+                }
+
+                // Actualizar la sección de valoración
+                if (currentSpot.totalRatings > 0) {
+                    binding.ratingBarIndicator.visibility = View.VISIBLE
+                    binding.ratingBarIndicator.rating = currentSpot.averageRating.toFloat()
+                    binding.tvCurrentRating.text = String.format(
+                        Locale.getDefault(),
+                        "%.1f / 5 (%d valoraciones)",
+                        currentSpot.averageRating,
+                        currentSpot.totalRatings
+                    )
+                } else {
+                    binding.ratingBarIndicator.visibility = View.GONE
+                    binding.tvCurrentRating.text = "Aún no hay valoraciones."
+                }
+
+                // Lógica de visibilidad para botones de propietario y de usuario logueado
+                val isLoggedIn = authManager.isUserLoggedIn()
+                val isOwner = isLoggedIn && authManager.getCurrentUserId() == currentSpot.userId
+
+                binding.llFavoriteStatus.visibility = if (isLoggedIn) View.VISIBLE else View.GONE
+                binding.btnAddRating.visibility = if (isLoggedIn) View.VISIBLE else View.GONE
+                // Ocultamos el botón de comentario porque su funcionalidad está en el diálogo de valoración
+                binding.btnAddComment.visibility = View.GONE
+
+                binding.btnEditSpot.visibility = if (isOwner) View.VISIBLE else View.GONE
+                binding.btnDeleteSpot.visibility = if (isOwner) View.VISIBLE else View.GONE
             }
         }
 
-        // Observar el estado de favorito
-        spotDetailViewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
-            binding.checkboxFavorite.isChecked = isFavorite
+        // Observador para el resultado de la eliminación
+        spotDetailViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
+            result.onSuccess {
+                Toast.makeText(context, "Spot eliminado correctamente", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
+            }.onFailure {
+                Toast.makeText(context, "Error al eliminar: ${it.message}", Toast.LENGTH_LONG).show()
+            }
         }
-        // Observar el resultado de la valoración
+
+        // Observador para el resultado de añadir una valoración
         spotDetailViewModel.addRatingResult.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
                 Toast.makeText(context, "¡Gracias por tu valoración!", Toast.LENGTH_SHORT).show()
             }.onFailure {
-                Toast.makeText(context, "Error: ${it.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Error al enviar la valoración: ${it.message}", Toast.LENGTH_LONG).show()
             }
         }
 
-        // Observar errores desde el ViewModel
-        spotDetailViewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            message?.let {
-                // Uso de SnackBar para mensajes más persistentes y con opción a acción, si quieres
-                Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
-                spotDetailViewModel.clearErrorMessage() // Limpiar el error después de mostrarlo
-            }
-        }
-
-        // Observar estado de carga
-        spotDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Aquí puedes mostrar/ocultar un ProgressBar global si tu layout lo tuviera
-            // Por ejemplo, si tuvieras un ProgressBar con id 'progressBar' en este layout:
-            // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        // Observador para el estado de favorito
+        spotDetailViewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
+            binding.checkboxFavorite.isChecked = isFavorite
         }
     }
 
     private fun setupListeners() {
+        // Listener para el checkbox de Favoritos
         binding.checkboxFavorite.setOnCheckedChangeListener { _, isChecked ->
-            // Cuando el usuario cambia el estado del checkbox, actualiza el ViewModel
-            currentSpotId?.let { id ->
-                spotDetailViewModel.toggleFavorite(id, !isChecked) // ¡Importante! currentIsFavorite es el estado antes del cambio
-            }
-            binding.btnAddRating.setOnClickListener {
-                currentSpotId?.let { showRatingDialog(it) }
+            currentSpotId?.let { spotId ->
+                spotDetailViewModel.toggleFavorite(spotId, !isChecked)
             }
         }
-        // Aquí configurarías los listeners para los otros botones de acción
-        // binding.btnEditSpot.setOnClickListener { /* Navegar a la pantalla de edición */ }
-        // binding.btnDeleteSpot.setOnClickListener { /* Mostrar diálogo de confirmación y eliminar */ }
-        // binding.btnAddComment.setOnClickListener { /* Abrir diálogo para añadir comentario */ }
-        // binding.btnAddRating.setOnClickListener { /* Abrir diálogo para añadir valoración */ }
-    }
 
+        // Listener para el botón de Añadir Valoración
+        binding.btnAddRating.setOnClickListener {
+            currentSpotId?.let { spotId ->
+                showRatingDialog(spotId)
+            }
+        }
+
+        // Listener para el botón de Editar Spot
+        binding.btnEditSpot.setOnClickListener {
+            currentSpotId?.let { spotId ->
+                // ¡ESTA LÍNEA AHORA FUNCIONARÁ! Navega a la pantalla de edición.
+                val action = SpotDetailFragmentDirections.actionSpotDetailFragmentToAddSpotFragment(spotIdToEdit = spotId)
+                findNavController().navigate(action)
+            }
+        }
+
+        // Listener para el botón de Eliminar Spot
+        binding.btnDeleteSpot.setOnClickListener {
+            showDeleteConfirmationDialog()
+        }
+    }
     private fun showRatingDialog(spotId: String) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_rating, null)
         val ratingBar = dialogView.findViewById<RatingBar>(R.id.dialogRatingBar)
@@ -220,6 +254,17 @@ class SpotDetailFragment : Fragment() {
                 dialog.cancel()
             }
             .create()
+            .show()
+    }
+
+    private fun showDeleteConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.confirm_delete_title)
+            .setMessage(R.string.confirm_delete_message)
+            .setPositiveButton(R.string.yes) { _, _ ->
+                spotDetailViewModel.deleteCurrentSpot()
+            }
+            .setNegativeButton(R.string.no, null)
             .show()
     }
 

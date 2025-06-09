@@ -41,8 +41,8 @@ class SpotDetailViewModel @Inject constructor(
     private val _isOwner = MutableLiveData<Boolean>()
     val isOwner: LiveData<Boolean> = _isOwner
 
-    private val _deleteSpotResult = MutableLiveData<Boolean>()
-    val deleteSpotResult: LiveData<Boolean> = _deleteSpotResult
+    private val _deleteResult = MutableLiveData<Result<Unit>>()
+    val deleteResult: LiveData<Result<Unit>> = _deleteResult
 
     // LiveData para el resultado de la valoración
     private val _addRatingResult = MutableLiveData<Result<Unit>>()
@@ -118,31 +118,29 @@ class SpotDetailViewModel @Inject constructor(
         }
     }
 
-    fun deleteSpot(spotId: String) {
+    fun deleteCurrentSpot() {
+        val spotToDelete = _spotDetails.value ?: return
+        val spotId = spotToDelete.spotId ?: return
+
         _isLoading.value = true
-        _errorMessage.value = null
         viewModelScope.launch {
             try {
-                val spot = spotDetails.value
-                if (spot == null || spot.spotId != spotId) {
-                    _errorMessage.value = "No se pudo encontrar el spot para eliminar."
-                    _deleteSpotResult.value = false
-                    return@launch
-                }
-
-                // Lógica de borrado de imágenes ya implementada, ¡perfecto!
-                spot.fotosUrls.forEach { imageUrl ->
+                // 1. Eliminar todas las imágenes asociadas de Firebase Storage
+                spotToDelete.fotosUrls.forEach { imageUrl ->
                     imageStorageRepository.deleteImage(imageUrl)
                 }
 
+                // 2. Eliminar el documento del spot de Firestore
                 val success = spotRepository.deleteSpot(spotId)
-                _deleteSpotResult.value = success
-                if (!success) {
-                    _errorMessage.value = "Error al eliminar el spot de la base de datos."
+
+                if (success) {
+                    _deleteResult.value = Result.success(Unit)
+                } else {
+                    throw Exception("Error al eliminar el spot de la base de datos.")
                 }
+
             } catch (e: Exception) {
-                _errorMessage.value = "Error inesperado al eliminar spot: ${e.message}"
-                _deleteSpotResult.value = false
+                _deleteResult.value = Result.failure(e)
             } finally {
                 _isLoading.value = false
             }

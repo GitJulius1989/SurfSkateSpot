@@ -73,32 +73,38 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilSpotDescription" />
 
-        <LinearLayout
-            android:id="@+id/llSportTypeCheckboxes"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupSportType"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="8dp"
+            app:singleSelection="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvSportTypesLabel">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkboxSurf"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSurf"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/sport_type_surf" />
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkboxSurfskate" android:layout_width="wrap_content"
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSurfskate"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:text="@string/sport_type_surfskate" />
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkboxSkatepark" android:layout_width="wrap_content"
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSkatepark"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:text="@string/sport_type_skatepark" />
-        </LinearLayout>
+
+        </com.google.android.material.chip.ChipGroup>
 
         <TextView
             android:id="@+id/tvLocationLabel"
@@ -109,7 +115,7 @@
             android:textStyle="bold"
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/llSportTypeCheckboxes" />
+            app:layout_constraintTop_toBottomOf="@id/chipGroupSportType" />
 
         <TextView
             android:id="@+id/tvSelectedLocation"

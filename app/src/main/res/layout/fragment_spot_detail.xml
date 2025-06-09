@@ -24,24 +24,14 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Nombre del Spot de Surf / Skate" />
 
-        <FrameLayout
-            android:id="@+id/imageGalleryContainer"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/imageSlider"
             android:layout_width="0dp"
-            android:layout_height="200dp"
+            android:layout_height="250dp"
             android:layout_marginTop="16dp"
-            android:background="#E0E0E0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvSpotName">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/galeria_de_imagenes"
-                android:textColor="#888888"
-                android:textSize="16sp" />
-        </FrameLayout>
+            app:layout_constraintTop_toBottomOf="@id/tvSpotName" />
 
         <TextView
             android:id="@+id/tvDescriptionLabel"
@@ -52,7 +42,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imageGalleryContainer" />
+            app:layout_constraintTop_toBottomOf="@id/imageSlider" />
 
         <TextView
             android:id="@+id/tvSpotDescription"
@@ -62,7 +52,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvDescriptionLabel"
-            tools:text="Esta es una descripción detallada del spot de surf o skate, incluyendo información sobre el tipo de olas, la superficie de skate, las mejores horas, etc. Podría ser un texto bastante largo que requiera scrolling." />
+            tools:text="Esta es una descripción detallada del spot..." />
 
         <TextView
             android:id="@+id/tvSportTypeLabel"
@@ -83,16 +73,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvSportTypeLabel">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingEnd="8dp"
-                android:text="@string/spots_type"
-                tools:ignore="RtlSymmetry" />
-        </LinearLayout>
-
+            app:layout_constraintTop_toBottomOf="@id/tvSportTypeLabel" />
 
         <LinearLayout
             android:id="@+id/llFavoriteStatus"
@@ -141,12 +122,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvRatingLabel">
 
+            <RatingBar
+                android:id="@+id/ratingBarIndicator"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:stepSize="0.1"
+                android:layout_marginBottom="4dp"/>
+
             <TextView
                 android:id="@+id/tvCurrentRating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="4.5 / 5 estrellas (15 valoraciones)" />
 
+            <Button
+                android:id="@+id/btnAddRating"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/anadir_valoracion" />
 
         </LinearLayout>
 
@@ -174,13 +172,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/primer_comentario" />
+                android:text="@string/primer_comentario"
+                tools:text="Primer comentario..."/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="@string/segundo_comentario" />
+                android:text="@string/segundo_comentario"
+                tools:text="Segundo comentario..."/>
 
             <Button
                 android:id="@+id/btnViewAllComments"
@@ -204,20 +204,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llComments">
 
-
             <Button
                 android:id="@+id/btnAddComment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:text="@string/anadir_comentario" />
-
-            <Button
-                android:id="@+id/btnAddRating"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="@string/anadir_valoracion" />
 
             <Button
                 android:id="@+id/btnEditSpot"
@@ -234,9 +226,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/eliminar_spot"
-                android:textColor="@color/design_default_color_error"
                 android:visibility="gone"
-                app:strokeColor="@color/design_default_color_error"
+                app:strokeColor="?attr/colorError"
                 tools:visibility="visible" />
         </LinearLayout>
 

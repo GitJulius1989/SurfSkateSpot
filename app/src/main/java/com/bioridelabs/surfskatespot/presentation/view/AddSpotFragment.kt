@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +34,8 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest // Para StateFlow
 import kotlinx.coroutines.launch
+import androidx.navigation.fragment.navArgs // Importa navArgs
+
 
 
 @AndroidEntryPoint
@@ -43,6 +46,9 @@ class AddSpotFragment : Fragment() {
 
     private val addSpotViewModel: AddSpotViewModel by viewModels()
     private lateinit var photoAdapter: AddPhotoAdapter
+
+    private val args: AddSpotFragmentArgs by navArgs()
+
 
     // Launcher para seleccionar imágenes de la galería
     private val pickImageLauncher: ActivityResultLauncher<String> =
@@ -77,6 +83,8 @@ class AddSpotFragment : Fragment() {
         }
 
 
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -87,10 +95,17 @@ class AddSpotFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Comprueba si se le ha pasado un 'spotIdToEdit' desde la pantalla de detalles.
+        args.spotIdToEdit?.let { spotId ->
+            Log.d("AddSpotFragment", "Modo Edición para spotId: $spotId")
+            // Cambia el título de la pantalla
+            binding.tvAddSpotTitle.text = "Editar Spot"
+            // Llama al ViewModel para que cargue los datos de ese spot en los campos.
+            addSpotViewModel.loadSpotForEditing(spotId)
+        }
 
         // Escucha el resultado que viene de SelectLocationFragment
         parentFragmentManager.setFragmentResultListener(SelectLocationFragment.REQUEST_KEY, viewLifecycleOwner) { key, bundle ->
-            // Cuando el resultado llega, actualizamos el ViewModel.
             val latitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LATITUDE)
             val longitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LONGITUDE)
             addSpotViewModel.onLocationSelected(latitude, longitude)
@@ -100,7 +115,6 @@ class AddSpotFragment : Fragment() {
         setupListeners()
         observeViewModel()
     }
-
     private fun setupUI() {
         // Configurar RecyclerView para fotos
         photoAdapter = AddPhotoAdapter { uri ->
@@ -122,27 +136,21 @@ class AddSpotFragment : Fragment() {
     private fun setupListeners() {
         // TextChangedListeners para campos de texto (usando StateFlows)
         viewLifecycleOwner.lifecycleScope.launch {
-            binding.etSpotName.textChanges() // Necesitará una extensión textChanges() o un TextWatcher
-                .collectLatest { text ->
-                    addSpotViewModel.onSpotNameChanged(text.toString())
-                }
+            binding.etSpotName.textChanges().collectLatest { addSpotViewModel.onSpotNameChanged(it.toString()) }
         }
         viewLifecycleOwner.lifecycleScope.launch {
-            binding.etSpotDescription.textChanges() // Necesitará una extensión textChanges() o un TextWatcher
-                .collectLatest { text ->
-                    addSpotViewModel.onSpotDescriptionChanged(text.toString())
-                }
+            binding.etSpotDescription.textChanges().collectLatest { addSpotViewModel.onSpotDescriptionChanged(it.toString()) }
         }
 
-        // Checkbox listeners
-        binding.checkboxSurf.setOnClickListener {
-            addSpotViewModel.onSportTypeSelected(SportType.SURF)
-        }
-        binding.checkboxSurfskate.setOnClickListener {
-            addSpotViewModel.onSportTypeSelected(SportType.SURFSKATE)
-        }
-        binding.checkboxSkatepark.setOnClickListener {
-            addSpotViewModel.onSportTypeSelected(SportType.SKATEPARK)
+        // Chip listeners
+        binding.chipGroupSportType.setOnCheckedChangeListener { _, checkedId ->
+            val sportType = when (checkedId) {
+                R.id.chipSurf -> SportType.SURF
+                R.id.chipSurfskate -> SportType.SURFSKATE
+                R.id.chipSkatepark -> SportType.SKATEPARK
+                else -> null
+            }
+            addSpotViewModel.onSportTypeSelected(sportType)
         }
 
         binding.btnSelectLocation.setOnClickListener {
