@@ -6,9 +6,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bioridelabs.surfskatespot.domain.model.Spot
+import com.bioridelabs.surfskatespot.domain.model.Valuation
 import com.bioridelabs.surfskatespot.domain.repository.ImageStorageRepository
 import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
 import com.bioridelabs.surfskatespot.domain.repository.UserRepository
+import com.bioridelabs.surfskatespot.domain.repository.ValuationRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -19,7 +21,8 @@ class SpotDetailViewModel @Inject constructor(
     private val spotRepository: SpotRepository,
     private val userRepository: UserRepository,
     private val firebaseAuth: FirebaseAuth,
-    private val imageStorageRepository: ImageStorageRepository
+    private val imageStorageRepository: ImageStorageRepository,
+    private val valuationRepository: ValuationRepository
 ) : ViewModel() {
 
     private val _spotDetails = MutableLiveData<Spot?>()
@@ -40,6 +43,10 @@ class SpotDetailViewModel @Inject constructor(
 
     private val _deleteSpotResult = MutableLiveData<Boolean>()
     val deleteSpotResult: LiveData<Boolean> = _deleteSpotResult
+
+    // LiveData para el resultado de la valoración
+    private val _addRatingResult = MutableLiveData<Result<Unit>>()
+    val addRatingResult: LiveData<Result<Unit>> = _addRatingResult
 
 
     fun loadSpotDetails(spotId: String) {
@@ -146,4 +153,30 @@ class SpotDetailViewModel @Inject constructor(
         _errorMessage.value = null
     }
 
+    fun submitRating(spotId: String, rating: Int, comment: String) {
+        val userId = firebaseAuth.currentUser?.uid
+        if (userId == null) {
+            _errorMessage.value = "Debes iniciar sesión para valorar un spot."
+            return
+        }
+
+        _isLoading.value = true
+        viewModelScope.launch {
+            val valuation = Valuation(
+                userId = userId,
+                spotId = spotId,
+                nota = rating,
+                comentario = comment
+            )
+            val success = valuationRepository.addValuation(valuation)
+            if (success) {
+                _addRatingResult.value = Result.success(Unit)
+                // Recargamos los detalles para mostrar la nueva media
+                loadSpotDetails(spotId)
+            } else {
+                _addRatingResult.value = Result.failure(Exception("No se pudo enviar la valoración."))
+            }
+            _isLoading.value = false
+        }
+    }
 }

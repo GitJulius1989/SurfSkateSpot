@@ -16,9 +16,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bioridelabs.surfskatespot.R
 import com.bioridelabs.surfskatespot.databinding.FragmentUserProfileBinding
-import com.bioridelabs.surfskatespot.presentation.adapter.SpotAdapter
+import com.bioridelabs.surfskatespot.domain.model.UserContribution // Asegúrate de tener esta clase
+import com.bioridelabs.surfskatespot.presentation.view.adapter.ContributionAdapter // El adapter que creamos
 import com.bioridelabs.surfskatespot.presentation.viewmodel.UserProfileViewModel
-import com.bioridelabs.surfskatespot.presentation.viewmodel.state.UserProfileState
+import com.bumptech.glide.Glide // Importa Glide para las imágenes
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -33,18 +34,12 @@ class UserProfileFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: UserProfileViewModel by viewModels()
-    private lateinit var favoritesAdapter: SpotAdapter
+    private lateinit var contributionAdapter: ContributionAdapter
 
-    // Moderno ActivityResultLauncher para el Photo Picker.
-    // No requiere permisos de almacenamiento en Android 13+ y es el enfoque recomendado.
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
-            // El usuario seleccionó una imagen.
-            viewModel.uploadProfileImage(uri)
-            Snackbar.make(binding.root,
-                getString(R.string.foto_actualizada_en_el_perfil_del_usuario), Snackbar.LENGTH_SHORT).show()
-        } else {
-            // El usuario cerró el selector sin elegir nada.
+            viewModel.uploadProfileImage(uri) // <-- Esto ahora funcionará
+            Snackbar.make(binding.root, getString(R.string.foto_actualizada_en_el_perfil_del_usuario), Snackbar.LENGTH_SHORT).show()
         }
     }
 
@@ -58,43 +53,39 @@ class UserProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
         setupClickListeners()
         observeUiState()
     }
 
-    // Es buena práctica llamar a la carga de datos en onResume para refrescar
-    // si el usuario vuelve a este fragmento.
     override fun onResume() {
         super.onResume()
-        viewModel.loadUserProfile()
+        viewModel.loadUserContributions()
     }
 
     private fun setupRecyclerView() {
-        favoritesAdapter = SpotAdapter { spotId ->
-            // Navegar al detalle del spot desde la lista de favoritos
+        contributionAdapter = ContributionAdapter { spotId ->
             val action = UserProfileFragmentDirections.actionProfileFragmentToSpotDetailFragment(spotId)
             findNavController().navigate(action)
         }
-        binding.favoritesRecyclerView.apply {
+        binding.favoritesRecyclerView.apply { // Asegúrate de que el ID en el XML es correcto
             layoutManager = LinearLayoutManager(context)
-            adapter = favoritesAdapter
+            adapter = contributionAdapter
         }
     }
 
     private fun setupClickListeners() {
         binding.editProfileImageFab.setOnClickListener {
-            // Lanzar el Photo Picker
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
         binding.logoutButton.setOnClickListener {
-            viewModel.logout()
+            viewModel.logout() // <-- Esto ahora funcionará
+            // Opcional: navegar al login tras cerrar sesión
+            findNavController().navigate(R.id.action_global_loginFragment)
         }
 
         binding.loginRegisterButton.setOnClickListener {
-            // Navegación global para ir al login desde cualquier parte de la app
             findNavController().navigate(R.id.action_global_loginFragment)
         }
     }
@@ -109,41 +100,37 @@ class UserProfileFragment : Fragment() {
         }
     }
 
-    private fun updateUiForState(state: UserProfileState) {
-        // Primero, gestionamos la visibilidad general
-        binding.progressBar.visibility = if (state is UserProfileState.Loading) View.VISIBLE else View.GONE
-        binding.profileContentScrollView.visibility = if (state is UserProfileState.LoggedIn) View.VISIBLE else View.GONE
-        binding.loggedOutView.visibility = if (state is UserProfileState.LoggedOut) View.VISIBLE else View.GONE
+    // <-- ¡CORRECCIÓN CLAVE AQUÍ! ->
+    // La firma del método ahora usa el tipo anidado y el 'when' es exhaustivo.
+    private fun updateUiForState(state: UserProfileViewModel.UserProfileState) {
+        binding.progressBar.visibility = if (state is UserProfileViewModel.UserProfileState.Loading) View.VISIBLE else View.GONE
+        binding.profileContentScrollView.visibility = if (state is UserProfileViewModel.UserProfileState.LoggedIn) View.VISIBLE else View.GONE
+        binding.loggedOutView.visibility = if (state is UserProfileViewModel.UserProfileState.LoggedOut) View.VISIBLE else View.GONE
 
         when (state) {
-            is UserProfileState.LoggedIn -> {
+            is UserProfileViewModel.UserProfileState.LoggedIn -> {
                 binding.usernameTextView.text = state.user.nombre
                 binding.emailTextView.text = state.user.email
 
-                // Formatear la fecha de registro
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val registrationDate = Date(state.user.fechaRegistro)
                 binding.registrationDateTextView.text = "Miembro desde: ${sdf.format(registrationDate)}"
 
-                // Cargar imagen de perfil con Glide o Coil (aquí un placeholder)
-                // Glide.with(this).load(state.user.fotoPerfilUrl).placeholder(R.drawable.ic_account_user).into(binding.profileImageView)
+                // Cargar imagen de perfil con Glide
+                Glide.with(this)
+                    .load(state.user.fotoPerfilUrl)
+                    .placeholder(R.drawable.ic_account_user)
+                    .circleCrop() // Para que la imagen sea redonda
+                    .into(binding.profileImageView)
 
-                favoritesAdapter.submitList(state.favoriteSpots)
+                contributionAdapter.submitList(state.contributions)
             }
-            is UserProfileState.Error -> {
+            is UserProfileViewModel.UserProfileState.Error -> {
                 Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
             }
-            // Los otros estados ya se manejan con la visibilidad
-            is UserProfileState.Loading, is UserProfileState.LoggedOut -> { }
+            is UserProfileViewModel.UserProfileState.Loading -> { /* Manejado por la visibilidad del progressBar */ }
+            is UserProfileViewModel.UserProfileState.LoggedOut -> { /* Manejado por la visibilidad del loggedOutView */ }
         }
-    }
-
-    private fun updateUi(isLoggedIn: Boolean) {
-        binding.logoutButton.visibility = if (isLoggedIn) View.VISIBLE else View.GONE
-        binding.settingsButton.visibility = if (isLoggedIn) View.VISIBLE else View.GONE
-        binding.usernameTextView.visibility = if (isLoggedIn) View.VISIBLE else View.GONE
-        binding.emailTextView.visibility = if (isLoggedIn) View.VISIBLE else View.GONE
-        binding.loginRegisterButton.visibility = if (isLoggedIn) View.GONE else View.VISIBLE
     }
 
     override fun onDestroyView() {

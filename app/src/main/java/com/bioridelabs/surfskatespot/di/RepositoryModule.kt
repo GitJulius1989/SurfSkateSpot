@@ -4,6 +4,7 @@ package com.bioridelabs.surfskatespot.di
 import com.bioridelabs.surfskatespot.domain.repository.ImageStorageRepository
 import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
 import com.bioridelabs.surfskatespot.domain.repository.UserRepository
+import com.bioridelabs.surfskatespot.domain.repository.ValuationRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -59,5 +60,10 @@ object RepositoryModule {
     @Provides
     fun provideImageStorageRepository(firebaseStorage: FirebaseStorage): ImageStorageRepository {
         return ImageStorageRepository(firebaseStorage)
+    }
+
+    @Provides
+    fun provideValuationRepository(firestore: FirebaseFirestore): ValuationRepository {
+        return ValuationRepository(firestore)
     }
 }

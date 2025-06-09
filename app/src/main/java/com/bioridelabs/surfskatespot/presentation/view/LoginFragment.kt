@@ -196,6 +196,12 @@ class LoginFragment : Fragment() {
                 Toast.makeText(context, "Error al iniciar sesión con Google.", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // Listener para el botón de invitado
+        binding.btnGuest.setOnClickListener {
+            // Simplemente navega al mapa sin realizar ninguna autenticación
+            findNavController().navigate(R.id.action_loginFragment_to_mapFragment)
+        }
     }
 
     /**

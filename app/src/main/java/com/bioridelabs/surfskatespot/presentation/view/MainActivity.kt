@@ -22,16 +22,21 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.bioridelabs.surfskatespot.R
 import com.bioridelabs.surfskatespot.databinding.ActivityMainBinding
+import com.bioridelabs.surfskatespot.di.AuthManager
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale // <-- ¡Añadir esta importación!
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    @Inject // Inyecta el AuthManager
+    lateinit var authManager: AuthManager
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var sharedPreferences: SharedPreferences // <-- ¡Añadir esta declaración!
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -79,6 +84,8 @@ class MainActivity : AppCompatActivity() {
         binding.navViewDrawer.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            val isUserLoggedIn = authManager.isUserLoggedIn() // Ahora esto debería funcionar
+
             when (destination.id) {
                 R.id.loginFragment -> {
                     binding.bottomNavigationView.visibility = View.GONE
@@ -92,8 +99,24 @@ class MainActivity : AppCompatActivity() {
                     binding.drawerLayout.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED)
                 }
             }
+            // --- LÓGICA DE RESTRICCIÓN PARA INVITADOS ---
+            // Menú lateral (Drawer)
+            val drawerMenu = binding.navViewDrawer.menu
+            drawerMenu.findItem(R.id.addSpotFragment).isVisible = isUserLoggedIn
+
+            // Menú de navegación inferior (Bottom Nav)
+            val bottomMenu = binding.bottomNavigationView.menu
+            bottomMenu.findItem(R.id.favoritesFragment).isVisible = isUserLoggedIn
+
+            // Si el usuario es un invitado y está en la pestaña de favoritos (porque acaba de cerrar sesión),
+            // lo redirigimos al mapa para evitar que se quede en una pantalla vacía.
+            if (!isUserLoggedIn && destination.id == R.id.favoritesFragment) {
+                navController.navigate(R.id.mapFragment)
+            }
         }
     }
+
+
 
     private fun applySavedPreferences() {
         // Aplicar idioma guardado

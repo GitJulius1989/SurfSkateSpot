@@ -84,4 +84,5 @@
     <string name="configuracion">Configuración</string>
     <string name="cerrar_sesion">Cerrar Sesión</string>
     <string name="mis_spots_favoritos">Mis Spots Favoritos</string>
+    <string name="acceder_como_invitado">Acceder como invitado</string>
 </resources>

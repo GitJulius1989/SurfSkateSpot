@@ -1,6 +1,7 @@
 // app/src/main/java/com/bioridelabs/surfskatespot/presentation/view/SpotDetailFragment.kt
 package com.bioridelabs.surfskatespot.presentation.view
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,10 +14,19 @@ import com.bioridelabs.surfskatespot.databinding.FragmentSpotDetailBinding
 import com.bioridelabs.surfskatespot.presentation.viewmodel.SpotDetailViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import android.widget.RatingBar
+import com.bioridelabs.surfskatespot.R
+import com.bioridelabs.surfskatespot.di.AuthManager
+import com.google.android.material.textfield.TextInputEditText
+import javax.inject.Inject
+
 
 // Fragmento para mostrar los detalles de un spot específico.
 @AndroidEntryPoint
 class SpotDetailFragment : Fragment() {
+
+    @Inject // Inyecta el AuthManager
+    lateinit var authManager: AuthManager
 
     private var _binding: FragmentSpotDetailBinding? = null
     private val binding get() = _binding!!
@@ -43,7 +53,18 @@ class SpotDetailFragment : Fragment() {
 
         // Obtén el ID del spot de los argumentos de navegación
         val spotId = args.spotId // Ahora puedes usar 'args.spotId'
+        currentSpotId = spotId // Guardo el ID para usarlo en los listeners
+
         spotDetailViewModel.loadSpotDetails(spotId) // Llama al ViewModel para cargar el spot
+
+        // --- LÓGICA DE RESTRICCIÓN PARA INVITADOS ---
+        val isUserLoggedIn = authManager.isUserLoggedIn()
+
+        // Oculta/muestra el checkbox de favorito
+        binding.llFavoriteStatus.visibility = if (isUserLoggedIn) View.VISIBLE else View.GONE
+
+        // Oculta/muestra el botón para añadir valoración
+        binding.btnAddRating.visibility = if (isUserLoggedIn) View.VISIBLE else View.GONE
 
         // Observa los datos del spot desde el ViewModel
         spotDetailViewModel.spotDetails.observe(viewLifecycleOwner) { spot ->
@@ -134,6 +155,14 @@ class SpotDetailFragment : Fragment() {
         spotDetailViewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
             binding.checkboxFavorite.isChecked = isFavorite
         }
+        // Observar el resultado de la valoración
+        spotDetailViewModel.addRatingResult.observe(viewLifecycleOwner) { result ->
+            result.onSuccess {
+                Toast.makeText(context, "¡Gracias por tu valoración!", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(context, "Error: ${it.message}", Toast.LENGTH_LONG).show()
+            }
+        }
 
         // Observar errores desde el ViewModel
         spotDetailViewModel.errorMessage.observe(viewLifecycleOwner) { message ->
@@ -158,12 +187,40 @@ class SpotDetailFragment : Fragment() {
             currentSpotId?.let { id ->
                 spotDetailViewModel.toggleFavorite(id, !isChecked) // ¡Importante! currentIsFavorite es el estado antes del cambio
             }
+            binding.btnAddRating.setOnClickListener {
+                currentSpotId?.let { showRatingDialog(it) }
+            }
         }
         // Aquí configurarías los listeners para los otros botones de acción
         // binding.btnEditSpot.setOnClickListener { /* Navegar a la pantalla de edición */ }
         // binding.btnDeleteSpot.setOnClickListener { /* Mostrar diálogo de confirmación y eliminar */ }
         // binding.btnAddComment.setOnClickListener { /* Abrir diálogo para añadir comentario */ }
         // binding.btnAddRating.setOnClickListener { /* Abrir diálogo para añadir valoración */ }
+    }
+
+    private fun showRatingDialog(spotId: String) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_rating, null)
+        val ratingBar = dialogView.findViewById<RatingBar>(R.id.dialogRatingBar)
+        val commentEditText = dialogView.findViewById<TextInputEditText>(R.id.dialogCommentEditText)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Valora este Spot")
+            .setView(dialogView)
+            .setPositiveButton("Enviar") { dialog, _ ->
+                val rating = ratingBar.rating.toInt()
+                val comment = commentEditText.text.toString()
+                if (rating > 0) {
+                    spotDetailViewModel.submitRating(spotId, rating, comment)
+                } else {
+                    Toast.makeText(context, "Por favor, selecciona al menos una estrella.", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.cancel()
+            }
+            .create()
+            .show()
     }
 
     override fun onDestroyView() {
