@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/presentation/view/SpotDetailFragment.kt
 package com.bioridelabs.surfskatespot.presentation.view
 
 import android.app.AlertDialog
@@ -24,6 +23,9 @@ import com.google.android.material.textfield.TextInputEditText
 import java.util.Locale
 import javax.inject.Inject
 import android.util.Log
+import com.bumptech.glide.Glide
+import com.google.android.material.tabs.TabLayoutMediator
+
 
 
 // Fragmento para mostrar los detalles de un spot específico.
@@ -56,25 +58,7 @@ class SpotDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Comprueba si estamos en modo edición y carga los datos del spot
-        // Después de reconstruir el proyecto, 'args' se resolverá sin problemas.
-        args.spotIdToEdit?.let { spotId ->
-            // Añadimos un Log para depurar y confirmar que el ID llega
-            Log.d("AddSpotFragment", "Modo Edición activado para spotId: $spotId")
-
-            binding.tvAddSpotTitle.text = "Editar Spot" // Cambia el título de la UI
-            addSpotViewModel.loadSpotForEditing(spotId) // Llama al ViewModel
-        }
-
-        // Escucha el resultado que viene de SelectLocationFragment
-        // Esta lógica es para cuando vuelves de seleccionar una ubicación en el mapa
-        parentFragmentManager.setFragmentResultListener(SelectLocationFragment.REQUEST_KEY, viewLifecycleOwner) { key, bundle ->
-            val latitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LATITUDE)
-            val longitude = bundle.getDouble(SelectLocationFragment.BUNDLE_KEY_LONGITUDE)
-            addSpotViewModel.onLocationSelected(latitude, longitude)
-        }
-
-        // Obtén el ID del spot de los argumentos de navegación
+         // Obtén el ID del spot de los argumentos de navegación
         val spotId = args.spotId // Ahora puedes usar 'args.spotId'
         currentSpotId = spotId // Guardo el ID para usarlo en los listeners
 
@@ -115,11 +99,9 @@ class SpotDetailFragment : Fragment() {
             // Aquí puedes mostrar/ocultar un ProgressBar
         }
 
-        // Aquí configuraría los listeners para los botones de acción
-        // binding.btnEditSpot.setOnClickListener { /* Navegar a la pantalla de edición */ }
-        // binding.btnDeleteSpot.setOnClickListener { /* Mostrar diálogo de confirmación y eliminar */ }
-        // binding.btnAddComment.setOnClickListener { /* Abrir diálogo para añadir comentario */ }
-        // binding.btnAddRating.setOnClickListener { /* Abrir diálogo para añadir valoración */ }
+        observeViewModel()
+        setupListeners()
+
     }
 
     private fun observeViewModel() {
@@ -131,15 +113,34 @@ class SpotDetailFragment : Fragment() {
                 currentSpotId = currentSpot.spotId
 
                 // Rellenar datos básicos
+                // Rellenar datos básicos de la UI
                 binding.tvSpotName.text = currentSpot.nombre
                 binding.tvSpotDescription.text = currentSpot.descripcion
+                binding.llSportTypes.removeAllViews() // Limpiamos por si acaso
+                val sportTypesText = currentSpot.tiposDeporte.joinToString(", ")
+                binding.llSportTypes.addView(android.widget.TextView(context).apply { text = sportTypesText })
 
-                // Configurar la galería de imágenes
+
+
+                // 1. Configurar la galería de imágenes
                 if (currentSpot.fotosUrls.isNotEmpty()) {
-                    binding.imageSlider.adapter = ImageSliderAdapter(currentSpot.fotosUrls)
+                    // Hacemos visibles el slider y el indicador
                     binding.imageSlider.visibility = View.VISIBLE
+                    binding.tabLayoutIndicator.visibility = View.VISIBLE
+
+                    // Creamos y asignamos el adaptador
+                    val imageAdapter = ImageSliderAdapter(currentSpot.fotosUrls)
+                    binding.imageSlider.adapter = imageAdapter
+
+                    // 2. Conectar el TabLayout con el ViewPager2 para los indicadores
+                    TabLayoutMediator(binding.tabLayoutIndicator, binding.imageSlider) { tab, position ->
+                        // No necesitamos hacer nada aquí, el background drawable se encarga de todo.
+                    }.attach()
+
                 } else {
+                    // Si no hay fotos, ocultamos el slider y el indicador
                     binding.imageSlider.visibility = View.GONE
+                    binding.tabLayoutIndicator.visibility = View.GONE
                 }
 
                 // Generar dinámicamente los tipos de deporte como Chips
@@ -176,6 +177,8 @@ class SpotDetailFragment : Fragment() {
                 binding.btnEditSpot.visibility = if (isOwner) View.VISIBLE else View.GONE
                 binding.btnDeleteSpot.visibility = if (isOwner) View.VISIBLE else View.GONE
             }
+
+
         }
 
         // Observador para el resultado de la eliminación
@@ -199,8 +202,47 @@ class SpotDetailFragment : Fragment() {
 
         // Observador para el estado de favorito
         spotDetailViewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
+            // Desvinculamos el listener para evitar que se dispare solo al setear el valor
+            binding.checkboxFavorite.setOnCheckedChangeListener(null)
             binding.checkboxFavorite.isChecked = isFavorite
+            // Volvemos a vincular el listener para que el usuario pueda interactuar
+            binding.checkboxFavorite.setOnCheckedChangeListener { _, isChecked ->
+                currentSpotId?.let { spotDetailViewModel.toggleFavorite(it, !isChecked) }
+            }
         }
+        // Observador para saber si el usuario actual es el propietario del spot
+        spotDetailViewModel.isOwner.observe(viewLifecycleOwner) { isOwner ->
+            binding.btnEditSpot.visibility = if (isOwner) View.VISIBLE else View.GONE
+            binding.btnDeleteSpot.visibility = if (isOwner) View.VISIBLE else View.GONE
+        }
+
+        // Observador para mensajes de error generales
+        spotDetailViewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+            errorMessage?.let {
+                Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
+                spotDetailViewModel.clearErrorMessage() // Limpiar para no mostrarlo de nuevo
+            }
+        }
+
+        // Observador para el estado de carga
+        spotDetailViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            // Aquí podrías gestionar un ProgressBar si lo tuvieras
+            binding.llActionButtons.visibility = if (isLoading) View.INVISIBLE else View.VISIBLE
+        }
+
+
+    }
+
+    /**
+     * Configura los listeners para los botones de acción del usuario.
+     */
+    private fun setupActionListeners() {
+        binding.btnDeleteSpot.setOnClickListener {
+            showDeleteConfirmationDialog()
+        }
+
+        // Aquí irían los listeners para editar, añadir valoración, etc.
+        // binding.btnEditSpot.setOnClickListener { ... }
     }
 
     private fun setupListeners() {
@@ -218,11 +260,11 @@ class SpotDetailFragment : Fragment() {
             }
         }
 
-        // Listener para el botón de Editar Spot
         binding.btnEditSpot.setOnClickListener {
-            currentSpotId?.let { spotId ->
-                // ¡ESTA LÍNEA AHORA FUNCIONARÁ! Navega a la pantalla de edición.
-                val action = SpotDetailFragmentDirections.actionSpotDetailFragmentToAddSpotFragment(spotIdToEdit = spotId)
+            // Usamos la variable de la clase 'currentSpotId', que sí es visible aquí.
+            // Le añadimos un '.let' para manejar el caso de que sea nulo de forma segura.
+            currentSpotId?.let { id ->
+                val action = SpotDetailFragmentDirections.actionSpotDetailFragmentToEditSpotFragment(id)
                 findNavController().navigate(action)
             }
         }

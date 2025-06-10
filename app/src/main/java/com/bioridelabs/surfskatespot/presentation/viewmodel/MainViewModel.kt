@@ -28,6 +28,11 @@ class MainViewModel @Inject constructor(
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
+    // MutableLiveData privado para el estado de visibilidad. Inicia en `true`.
+    private val _areSpotsVisible = MutableLiveData<Boolean>(true)
+    // LiveData público e inmutable para que la UI lo observe.
+    val areSpotsVisible: LiveData<Boolean> get() = _areSpotsVisible
+
     init {
         loadSpots()
     }
@@ -48,6 +53,16 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Alterna el estado de visibilidad de los spots.
+     * Si el valor actual es true, lo cambia a false, y viceversa.
+     */
+    fun toggleSpotsVisibility() {
+        // Obtenemos el valor actual (o `true` si es nulo) y lo negamos.
+        _areSpotsVisible.value = !(_areSpotsVisible.value ?: true)
+    }
+
     // ¡AÑADE ESTE MÉTODO PARA LIMPIAR EL MENSAJE DE ERROR!
     fun clearErrorMessage() {
         _errorMessage.value = null

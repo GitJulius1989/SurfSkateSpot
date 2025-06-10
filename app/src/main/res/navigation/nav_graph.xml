@@ -150,6 +150,9 @@
             app:popUpTo="@id/mapFragment"
             app:popUpToInclusive="false"
             app:launchSingleTop="true" />
+        <action
+            android:id="@+id/actionSpotDetailFragmentToEditSpotFragment"
+            app:destination="@id/addSpotFragment" />
     </fragment>
 
     <fragment
@@ -171,18 +174,23 @@
         android:label="@string/anadir_spot"
         tools:layout="@layout/fragment_add_spot">
 
+        <argument
+            android:name="spotIdToEdit"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+
         <action
             android:id="@+id/action_addSpotFragment_to_selectLocationFragment"
             app:destination="@id/selectLocationFragment" />
 
         <action
-            android:id="@+id/action_addSpotFragment_to_mapFragmentForSelection"
-            app:destination="@id/mapFragment">
-            <argument
-                android:name="selectionMode"
-                app:argType="boolean"
-                android:defaultValue="true" />
-        </action>
+            android:id="@+id/action_addSpotFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="true"/>
+
     </fragment>
 
     <fragment

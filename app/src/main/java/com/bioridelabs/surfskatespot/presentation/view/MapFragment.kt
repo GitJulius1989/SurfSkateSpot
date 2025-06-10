@@ -50,7 +50,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var spotsVisibilityFab: FloatingActionButton
 
 
-
     private var isSatelliteView = false
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
 
@@ -72,7 +71,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         layerToggleButton = view.findViewById(R.id.mapTypeFab)
         spotsVisibilityFab = view.findViewById(R.id.spotsVisibilityFab)
 
-        val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as SupportMapFragment
+        val mapFragment =
+            childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
@@ -82,33 +82,52 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         setupLayerToggleButton()
         setupSpotsVisibilityFab()
 
-        // Observar favoritos para actualizar los marcadores (solo si no estamos en modo selección)
+        // 1. Observa el estado de visibilidad
+        mainViewModel.areSpotsVisible.observe(viewLifecycleOwner) { areVisible ->
+            // Actualiza el icono del FAB para dar feedback visual
+            val iconRes =
+                if (areVisible) R.drawable.ic_spot else R.drawable.ic_spot_visibilityoff
+            spotsVisibilityFab.setImageResource(iconRes)
+            // Redibuja el mapa para aplicar la visibilidad
+            drawSpotsOnMap(mainViewModel.spots.value ?: emptyList())
+        }
+
+        // 2. Observa la lista de spots
+        mainViewModel.spots.observe(viewLifecycleOwner) { spots ->
+            drawSpotsOnMap(spots)
+        }
+
+        // 3. Observa los favoritos (para actualizar los iconos si cambian)
         if (!args.selectionMode) {
             favoritesViewModel.favoriteSpots.observe(viewLifecycleOwner) { favoriteSpots ->
                 currentFavoriteSpotIds = favoriteSpots.mapNotNull { it.spotId }.toSet()
-                // Redibujar los marcadores cuando la lista de favoritos cambie
-                map?.clear()
-                mainViewModel.spots.value?.let { drawSpotsOnMap(it) } // Redibujar spots con el estado de favoritos actualizado
-            }
-
-            // Observar todos los spots para mostrarlos en el mapa
-            mainViewModel.spots.observe(viewLifecycleOwner) { spots ->
-                drawSpotsOnMap(spots)
+                drawSpotsOnMap(mainViewModel.spots.value ?: emptyList())
             }
         }
     }
 
     private fun setupMap() {
         map?.let { googleMap ->
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 try {
                     googleMap.isMyLocationEnabled = true
                     getUserLocation()
                 } catch (securityException: SecurityException) {
-                    Toast.makeText(context, "Permiso de ubicación denegado por el sistema", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Permiso de ubicación denegado por el sistema",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } else {
-                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                requestPermissions(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
             }
 
             googleMap.setOnMarkerClickListener { marker ->
@@ -158,23 +177,29 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     //Para filtrar spots, en la v2
     private fun setupSpotsVisibilityFab() {
         spotsVisibilityFab.setOnClickListener {
-            Toast.makeText(context, "Funcionalidad de filtro de spots", Toast.LENGTH_SHORT).show()
+            mainViewModel.toggleSpotsVisibility()
         }
     }
 
     // Nueva función para dibujar los spots en el mapa
     private fun drawSpotsOnMap(spots: List<Spot>) {
-        map?.clear() // Limpiar marcadores existentes
+        map?.clear() // Limpiar marcadores existentes siempre
+
+        // ¡LA CLÁUSULA DE GUARDA! Si los spots no deben ser visibles, simplemente salimos.
+        if (mainViewModel.areSpotsVisible.value == false) {
+            return
+        }
+
         spots.forEach { spot ->
             val location = LatLng(spot.latitud, spot.longitud)
-            val isFavorite = currentFavoriteSpotIds.contains(spot.spotId) // Comprobar si es favorito
+            val isFavorite = currentFavoriteSpotIds.contains(spot.spotId)
 
             val markerOptions = MarkerOptions()
                 .position(location)
                 .title(spot.nombre)
                 .snippet(buildMarkerSnippet(spot))
-                .icon(getSpotIcon(spot, isFavorite)) // Pasar el estado de favorito
-                .anchor(0.5f, 0.5f) // Centrar el icono del marcador
+                .icon(getSpotIcon(spot, isFavorite))
+                .anchor(0.5f, 0.5f)
 
             val marker = map?.addMarker(markerOptions)
             marker?.tag = spot.spotId
@@ -185,18 +210,27 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private fun getSpotIcon(spot: Spot, isFavorite: Boolean): BitmapDescriptor {
         // Determinar el icono base según el tipo de deporte
         val baseIconResId: Int = when {
-            // Prioridad: Surfskate si se selecciona específicamente
-            // Prioridad de los tipos de deporte para el icono
-            spot.tiposDeporte.contains(SportType.SURF.type) -> SportType.SURF.iconResId
-            spot.tiposDeporte.contains(SportType.SURFSKATE.type) -> SportType.SURFSKATE.iconResId // Nuevo orden
+            // Primero comprueba los tipos más específicos
             spot.tiposDeporte.contains(SportType.SKATEPARK.type) -> SportType.SKATEPARK.iconResId
-            else -> R.drawable.ic_spot // Un icono por defecto si no coincide con ninguno
+            spot.tiposDeporte.contains(SportType.SURFSKATE.type) -> SportType.SURFSKATE.iconResId
+            // Por último, el más general
+            spot.tiposDeporte.contains(SportType.SURF.type) -> SportType.SURF.iconResId
+            // Un icono por defecto si no coincide con ninguno
+            else -> R.drawable.ic_layers
         }
         // Determinar el color de tintado
-        val tintColorResId = if (isFavorite) R.color.yellow_gold else R.color.black // Cambiar tint a yellow_gold si es favorito
+        val tintColorResId =
+            if (isFavorite) R.color.yellow_gold else R.color.black // Cambiar tint a yellow_gold si es favorito
 
-        // Usar BitmapHelper para crear el BitmapDescriptor a partir del VectorDrawable
-        return BitmapHelper.vectorToBitmap(requireContext(), baseIconResId, tintColorResId)
+        // Uso BitmapHelper pasándole el tamaño deseado en DP.
+        // 36dp es un buen punto de partida, similar al marcador de Google.
+        return BitmapHelper.vectorToBitmap(
+            context = requireContext(),
+            id = baseIconResId,
+            colorTint = tintColorResId,
+            widthDp = 36,
+            heightDp = 36
+        )
     }
 
 

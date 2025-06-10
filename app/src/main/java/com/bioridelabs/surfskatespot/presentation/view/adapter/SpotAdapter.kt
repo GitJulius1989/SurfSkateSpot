@@ -10,8 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bioridelabs.surfskatespot.R // Importa R para acceder a recursos si fuera necesario (ej. strings o drawables)
 import com.bioridelabs.surfskatespot.databinding.ItemSpotBinding // Asumimos que generarás este binding
 import com.bioridelabs.surfskatespot.domain.model.Spot
-// Importar Glide o Coil para cargar imágenes (lo haremos más adelante)
-// import com.bumptech.glide.Glide
+import com.bumptech.glide.Glide
 
 // Adaptador para la RecyclerView que muestra una lista de spots.
 // Utiliza ListAdapter para manejar actualizaciones de la lista de manera eficiente.
@@ -45,16 +44,18 @@ class SpotAdapter(private val onItemClick: (String) -> Unit) :
                 // binding.tvTotalRatings.text = ""
             }
 
-            // Cargar la imagen del spot (usar Glide/Coil cuando lo añadas)
-            // if (spot.fotosUrls.isNotEmpty()) { // Usar fotosUrls si es una lista
-            //     Glide.with(binding.ivSpotThumbnail.context)
-            //         .load(spot.fotosUrls.first()) // Cargar la primera imagen si hay varias
-            //         .placeholder(R.drawable.placeholder_image) // Opcional: imagen de placeholder
-            //         .error(R.drawable.error_image) // Opcional: imagen de error
-            //         .into(binding.ivSpotThumbnail)
-            // } else {
-            //     binding.ivSpotThumbnail.setImageResource(R.drawable.default_spot_thumbnail) // Opcional: imagen por defecto
-            // }
+            // Cargar la imagen del spot usando Glide.
+            if (spot.fotosUrls.isNotEmpty()) {
+                Glide.with(binding.ivSpotThumbnail.context)
+                    .load(spot.fotosUrls.first()) // Cargar la primera imagen como miniatura
+                    .placeholder(R.drawable.ic_layers) // Un placeholder mientras carga
+                    .error(R.drawable.ic_layers)       // Un icono de error si falla la carga
+                    .centerCrop() // Asegura que la imagen llene el espacio
+                    .into(binding.ivSpotThumbnail)
+            } else {
+                // Si no hay fotos, mostrar una imagen por defecto.
+                binding.ivSpotThumbnail.setImageResource(R.drawable.ic_layers)
+            }
 
             // Configurar el click listener para el elemento completo
             binding.root.setOnClickListener {

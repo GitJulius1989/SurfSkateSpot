@@ -18,6 +18,8 @@ import com.bioridelabs.surfskatespot.domain.model.Spot
 import com.bioridelabs.surfskatespot.presentation.adapter.SpotAdapter // Asumimos que crearemos este adaptador
 import com.bioridelabs.surfskatespot.presentation.viewmodel.MainViewModel // Importa tu MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.fragment.app.activityViewModels
+
 
 @AndroidEntryPoint
 class SpotListFragment : Fragment() {
@@ -26,7 +28,7 @@ class SpotListFragment : Fragment() {
     private val binding get() = _binding!!
 
     // Inyecta el MainViewModel que ya creamos y que carga los spots
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     // Declaramos el adaptador de la RecyclerView
     private lateinit var spotAdapter: SpotAdapter

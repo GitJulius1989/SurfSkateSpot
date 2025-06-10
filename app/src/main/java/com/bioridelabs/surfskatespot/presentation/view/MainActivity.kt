@@ -23,8 +23,9 @@ import androidx.navigation.ui.setupWithNavController
 import com.bioridelabs.surfskatespot.R
 import com.bioridelabs.surfskatespot.databinding.ActivityMainBinding
 import com.bioridelabs.surfskatespot.di.AuthManager
+import androidx.activity.OnBackPressedCallback
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Locale // <-- ¡Añadir esta importación!
+import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -62,7 +63,8 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.topAppBar)
         setSupportActionBar(toolbar)
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
         appBarConfiguration = AppBarConfiguration(
@@ -113,7 +115,27 @@ class MainActivity : AppCompatActivity() {
             if (!isUserLoggedIn && destination.id == R.id.favoritesFragment) {
                 navController.navigate(R.id.mapFragment)
             }
+
+
         }
+
+        // Lógica para controlar el botón "atrás"
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Si el destino actual es el MapFragment, sal de la app.
+                if (navController.currentDestination?.id == R.id.mapFragment) {
+                    finish()
+                } else {
+                    // Si no, usa el comportamiento por defecto (navegar hacia atrás en la pila)
+                    // o si estamos en una pantalla de primer nivel, vuelve al mapa.
+                    if (appBarConfiguration.topLevelDestinations.contains(navController.currentDestination?.id)) {
+                        navController.navigate(R.id.mapFragment)
+                    } else {
+                        navController.navigateUp()
+                    }
+                }
+            }
+        })
     }
 
 

@@ -57,6 +57,12 @@ class AddSpotViewModel @Inject constructor(
 
     private var existingPhotoUrls: List<String> = emptyList()
 
+    private var spotIdToEdit: String? = null
+
+    private val _selectedSportType = MutableLiveData<SportType?>(null)
+
+
+
 
 
     // ... (El resto de tus métodos 'on...Changed' y 'add/remove PhotoUri' se mantienen igual)
@@ -164,25 +170,35 @@ class AddSpotViewModel @Inject constructor(
     }
 
     fun loadSpotForEditing(spotId: String) {
-        spotIdForUpdate = spotId
+        // Guardamos el ID para usarlo al actualizar.
+        spotIdToEdit = spotId
+        _isLoading.value = true
         viewModelScope.launch {
-            _isLoading.value = true
-            val spot = spotRepository.getSpot(spotId)
-            spot?.let {
-                _spotName.value = it.nombre
-                _spotDescription.value = it.descripcion
-                onLocationSelected(it.latitud, it.longitud)
+            try {
+                val spot = spotRepository.getSpot(spotId) // Necesitas un método getSpot en tu repositorio
+                if (spot != null) {
+                    // Rellenamos los StateFlows y LiveData con los datos del spot.
+                    _spotName.value = spot.nombre
+                    _spotDescription.value = spot.descripcion
+                    _selectedLocation.value = Pair(spot.latitud, spot.longitud)
 
-                val sportTypeEnum = SportType.fromType(it.tiposDeporte.firstOrNull() ?: "")
-                onSportTypeSelected(sportTypeEnum)
+                    // Para el tipo de deporte, asumimos que por ahora solo hay uno.
+                    // Si tuvieras varios, aquí necesitarías una lógica más compleja.
+                    val sportTypeString = spot.tiposDeporte.firstOrNull()
+                    _selectedSportType.value = sportTypeString?.let { SportType.fromType(it) }
 
-                // Guardamos las fotos existentes
-                existingPhotoUrls = it.fotosUrls
-                // Convertimos las URLs remotas a Uris para mostrarlas en el adaptador
-                // Nota: El adaptador cargará estas URLs directamente con Glide.
-                _selectedPhotoUris.value = it.fotosUrls.map { url -> Uri.parse(url) }.toMutableList()
+                    // Para las fotos, esto es más complejo. Las URLs son de Firebase Storage,
+                    // no Uris locales. Para edición, podrías mostrarlas y permitir borrarlas,
+                    // pero no puedes añadirlas directamente a _selectedPhotoUris.
+                    // Para el MVP, podríamos empezar por no permitir editar las fotos.
+                } else {
+                    _errorMessage.value = "No se pudo encontrar el spot para editar."
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error al cargar el spot: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
-            _isLoading.value = false
         }
     }
 

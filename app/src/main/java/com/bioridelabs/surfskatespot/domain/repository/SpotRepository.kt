@@ -36,8 +36,9 @@ class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO
         return try {
             // Asegúrate de que Spot tenga sus fotosUrls ya cargadas con URLs de Storage
             val docRef = spotsCollection.add(spot).await()
-            // Opcional: asignar el ID generado al objeto Spot (útil si lo usas después)
-            spot.spotId = docRef.id
+            // Paso 2: Actualizar el documento recién creado para añadirle su propio ID.
+            val spotId = docRef.id
+            spotsCollection.document(spotId).update("spotId", spotId).await()
             true
         } catch (e: Exception) {
             e.printStackTrace()

@@ -9,34 +9,50 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import androidx.core.graphics.createBitmap
 
 object BitmapHelper {
     /**
-     * Convierte un recurso drawable vectorial en un BitmapDescriptor.
-     * Esto es útil para usar Drawables SVG como iconos de marcador en Google Maps.
+     * Convierte un recurso drawable vectorial en un BitmapDescriptor con un tamaño específico.
+     * @param context Contexto de la aplicación.
+     * @param id El ID del recurso drawable.
+     * @param colorTint Color (como Resource ID) para tintar el icono (opcional).
+     * @param widthDp El ancho deseado del icono en DP (opcional).
+     * @param heightDp El alto deseado del icono en DP (opcional).
      */
     fun vectorToBitmap(
         context: Context,
         @DrawableRes id: Int,
-        colorTint: Int? = null // Opcional: para tintar el icono
+        colorTint: Int? = null,
+        widthDp: Int? = null, // ¡NUEVO PARÁMETRO!
+        heightDp: Int? = null  // ¡NUEVO PARÁMETRO!
     ): BitmapDescriptor {
         val drawable = ContextCompat.getDrawable(context, id)
-        if (drawable == null) {
-            return BitmapDescriptorFactory.defaultMarker() // Retorna un marcador por defecto si el drawable no se encuentra
+            ?: return BitmapDescriptorFactory.defaultMarker()
+
+        // ¡LÓGICA MEJORADA PARA CALCULAR EL TAMAÑO!
+        val widthInPixels: Int
+        val heightInPixels: Int
+
+        if (widthDp != null && heightDp != null) {
+            // Convertimos los DP a Píxeles usando la densidad de la pantalla
+            val density = context.resources.displayMetrics.density
+            widthInPixels = (widthDp * density).toInt()
+            heightInPixels = (heightDp * density).toInt()
+        } else {
+            // Si no se especifica tamaño, usamos el intrínseco (comportamiento anterior)
+            widthInPixels = drawable.intrinsicWidth
+            heightInPixels = drawable.intrinsicHeight
         }
-        // Ajustar el tamaño del drawable para que sea apropiado para un marcador si es necesario.
-        // Aquí se usa el tamaño intrínseco, que para un VectorDrawable de 24dp es 24x24 pixels.
-        // Si necesitas un tamaño específico para los marcadores, puedes ajustarlo aquí:
-        // drawable.setBounds(0, 0, desiredWidth, desiredHeight)
-        drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+
+        // Aplicamos el tamaño calculado
+        drawable.setBounds(0, 0, widthInPixels, heightInPixels)
+
         if (colorTint != null) {
             drawable.setTint(ContextCompat.getColor(context, colorTint))
         }
-        val bitmap = Bitmap.createBitmap(
-            drawable.intrinsicWidth,
-            drawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
-        )
+
+        val bitmap = createBitmap(widthInPixels, heightInPixels)
         val canvas = Canvas(bitmap)
         drawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)
