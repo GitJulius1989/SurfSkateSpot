@@ -76,6 +76,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Forzamos la recarga de spots cada vez que el mapa se vuelve visible.
+        // Esto asegura que si la carga inicial falló o si hay nuevos spots,
+        // el mapa se actualizará.
+        mainViewModel.loadSpots()
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         setupMap()

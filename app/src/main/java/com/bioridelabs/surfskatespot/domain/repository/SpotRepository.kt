@@ -5,6 +5,7 @@ import com.bioridelabs.surfskatespot.domain.model.Spot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.FieldPath
 import javax.inject.Inject
 
 
@@ -95,15 +96,27 @@ class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO
     suspend fun getSpotsByIds(spotIds: List<String>): List<Spot> {
         if (spotIds.isEmpty()) return emptyList()
 
+        // Firestore solo permite hasta 30 elementos en una consulta `in`.
+        // Si esperas tener más, necesitarás dividirlo en lotes (chunks).
+        // Para el MVP y la mayoría de los casos, esto es suficiente.
+        val spotIdChunks = spotIds.chunked(30)
+        val spotsList = mutableListOf<Spot>()
+
         return try {
-            val snapshot = spotsCollection.whereIn("spotId", spotIds).get().await() // Firestore solo permite hasta 10 IDs en whereIn
-            // Si esperas más de 10 IDs, deberías dividir la consulta en lotes o reevaluar la estrategia.
-            // Para un MVP, 10 es un buen punto de partida.
-            snapshot.documents.mapNotNull { doc ->
-                val spot = doc.toObject<Spot>()
-                spot?.spotId = doc.id
-                spot
+            for (chunk in spotIdChunks) {
+                // --- ¡ESTA ES LA LÍNEA CLAVE A CAMBIAR! ---
+                // En lugar de buscar en un campo "spotId", buscamos en el ID del documento.
+                val snapshot = spotsCollection.whereIn(FieldPath.documentId(), chunk).get().await()
+
+                snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(Spot::class.java)?.also {
+                        // La anotación @DocumentId se encarga de esto, pero por seguridad no hace daño.
+                        it.spotId = doc.id
+                        spotsList.add(it)
+                    }
+                }
             }
+            spotsList
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()

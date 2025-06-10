@@ -63,8 +63,8 @@
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/editProfileImageFab"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="39dp"
+                    android:layout_height="39dp"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
                     app:fabSize="mini"
@@ -114,14 +114,6 @@
                 android:nestedScrollingEnabled="false"
                 tools:itemCount="3"
                 tools:listitem="@layout/item_spot" />
-
-            <Button
-                android:id="@+id/settingsButton"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/configuracion" />
 
             <Button
                 android:id="@+id/logoutButton"

@@ -83,6 +83,6 @@
     <string name="foto_actualizada_en_el_perfil_del_usuario">Foto actualizada en el perfil del usuario</string>
     <string name="configuracion">Configuración</string>
     <string name="cerrar_sesion">Cerrar Sesión</string>
-    <string name="mis_spots_favoritos">Mis Spots Favoritos</string>
+    <string name="mis_spots_favoritos">Contribuciones a la comunidad</string>
     <string name="acceder_como_invitado">Acceder como invitado</string>
 </resources>

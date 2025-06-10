@@ -25,6 +25,8 @@ import javax.inject.Inject
 import android.util.Log
 import com.bumptech.glide.Glide
 import com.google.android.material.tabs.TabLayoutMediator
+import androidx.lifecycle.lifecycleScope
+
 
 
 
@@ -202,13 +204,8 @@ class SpotDetailFragment : Fragment() {
 
         // Observador para el estado de favorito
         spotDetailViewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
-            // Desvinculamos el listener para evitar que se dispare solo al setear el valor
-            binding.checkboxFavorite.setOnCheckedChangeListener(null)
+            // El observador SOLO se encarga de actualizar la UI. Nada más.
             binding.checkboxFavorite.isChecked = isFavorite
-            // Volvemos a vincular el listener para que el usuario pueda interactuar
-            binding.checkboxFavorite.setOnCheckedChangeListener { _, isChecked ->
-                currentSpotId?.let { spotDetailViewModel.toggleFavorite(it, !isChecked) }
-            }
         }
         // Observador para saber si el usuario actual es el propietario del spot
         spotDetailViewModel.isOwner.observe(viewLifecycleOwner) { isOwner ->
@@ -247,10 +244,9 @@ class SpotDetailFragment : Fragment() {
 
     private fun setupListeners() {
         // Listener para el checkbox de Favoritos
-        binding.checkboxFavorite.setOnCheckedChangeListener { _, isChecked ->
-            currentSpotId?.let { spotId ->
-                spotDetailViewModel.toggleFavorite(spotId, !isChecked)
-            }
+        binding.checkboxFavorite.setOnClickListener {
+            // Simplemente notificamos al ViewModel que el usuario ha hecho clic.
+            spotDetailViewModel.toggleFavoriteStatus()
         }
 
         // Listener para el botón de Añadir Valoración

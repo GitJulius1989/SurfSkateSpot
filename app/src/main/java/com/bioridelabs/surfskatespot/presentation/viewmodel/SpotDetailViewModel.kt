@@ -93,20 +93,22 @@ class SpotDetailViewModel @Inject constructor(
         }
     }
 
-    fun toggleFavorite(spotId: String, currentIsFavorite: Boolean) {
-        val currentUserId = firebaseAuth.currentUser?.uid
-        if (currentUserId == null) {
+    fun toggleFavoriteStatus() {
+        val currentUserId = firebaseAuth.currentUser?.uid ?: run {
             _errorMessage.value = "Debes iniciar sesión para marcar spots como favoritos."
             return
         }
+        val spotId = _spotDetails.value?.spotId ?: return
+        val currentStatus = _isFavorite.value ?: false
 
-        _isLoading.value = true
         viewModelScope.launch {
+            _isLoading.value = true
             try {
-                val success = userRepository.toggleFavoriteSpot(currentUserId, spotId, !currentIsFavorite)
+                // La nueva lógica: le decimos al repositorio cuál debe ser el nuevo estado.
+                val success = userRepository.toggleFavoriteSpot(currentUserId, spotId, !currentStatus)
                 if (success) {
-                    _isFavorite.value = !currentIsFavorite
-                    _errorMessage.value = if (!currentIsFavorite) "Spot añadido a favoritos." else "Spot eliminado de favoritos."
+                    // Actualizamos nuestro LiveData interno, que notificará a la UI.
+                    _isFavorite.value = !currentStatus
                 } else {
                     _errorMessage.value = "Error al actualizar favoritos."
                 }
