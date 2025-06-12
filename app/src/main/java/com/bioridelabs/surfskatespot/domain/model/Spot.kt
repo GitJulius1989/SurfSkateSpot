@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/domain/model/Spot.kt
 package com.bioridelabs.surfskatespot.domain.model
 
 import com.google.firebase.firestore.DocumentId

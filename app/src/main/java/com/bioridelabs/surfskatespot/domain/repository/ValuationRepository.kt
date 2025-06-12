@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/domain/repository/ValuationRepository.kt
 package com.bioridelabs.surfskatespot.domain.repository
 
 import com.bioridelabs.surfskatespot.domain.model.Spot

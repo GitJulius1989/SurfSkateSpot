@@ -1,4 +1,3 @@
-// En: presentation/viewmodel/AddSpotViewModel.kt
 package com.bioridelabs.surfskatespot.presentation.viewmodel
 
 import android.net.Uri

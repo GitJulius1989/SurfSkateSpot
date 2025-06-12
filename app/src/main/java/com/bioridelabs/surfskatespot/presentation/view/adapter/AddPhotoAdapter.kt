@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/presentation/view/adapter/AddPhotoAdapter.kt
 package com.bioridelabs.surfskatespot.presentation.view.adapter
 
 import android.net.Uri

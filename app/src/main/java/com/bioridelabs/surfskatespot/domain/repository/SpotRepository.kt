@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/domain/repository/SpotRepository.kt
 package com.bioridelabs.surfskatespot.domain.repository
 
 import com.bioridelabs.surfskatespot.domain.model.Spot
@@ -9,10 +8,7 @@ import com.google.firebase.firestore.FieldPath
 import javax.inject.Inject
 
 
-class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO CLAVE AQUÍ! Usa 'private val firestore: FirebaseFirestore' directamente en el constructor
-
-    // Ya no necesitas esta línea: private val firestore = FirebaseFirestore.getInstance()
-    // Porque 'firestore' ya es una propiedad del constructor y se inicializa con la que Dagger le da.
+class SpotRepository(private val firestore: FirebaseFirestore) {
 
     private val spotsCollection = firestore.collection("spots") // Ahora usa la instancia inyectada
 
@@ -32,14 +28,22 @@ class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO
     }
 
 
-    // Agregar un nuevo spot
     suspend fun addSpot(spot: Spot): Boolean {
         return try {
-            // Asegúrate de que Spot tenga sus fotosUrls ya cargadas con URLs de Storage
-            val docRef = spotsCollection.add(spot).await()
-            // Paso 2: Actualizar el documento recién creado para añadirle su propio ID.
-            val spotId = docRef.id
-            spotsCollection.document(spotId).update("spotId", spotId).await()
+            val spotData = mapOf(
+                "userId" to spot.userId,
+                "nombre" to spot.nombre,
+                "tiposDeporte" to spot.tiposDeporte,
+                "descripcion" to spot.descripcion,
+                "latitud" to spot.latitud,
+                "longitud" to spot.longitud,
+                "fotosUrls" to spot.fotosUrls,
+                "fechaCreacion" to com.google.firebase.firestore.FieldValue.serverTimestamp(), // Mejor forma de usar Timestamps
+                "estado" to spot.estado,
+                "averageRating" to spot.averageRating,
+                "totalRatings" to spot.totalRatings
+            )
+            spotsCollection.add(spotData).await()
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -47,11 +51,24 @@ class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO
         }
     }
 
-    // Actualizar un spot existente
     suspend fun updateSpot(spot: Spot): Boolean {
         return try {
             val id = spot.spotId ?: return false
-            spotsCollection.document(id).set(spot).await()
+            // Reutilizamos la misma lógica de mapa para asegurar consistencia
+            val spotData = mapOf(
+                "userId" to spot.userId,
+                "nombre" to spot.nombre,
+                "tiposDeporte" to spot.tiposDeporte,
+                "descripcion" to spot.descripcion,
+                "latitud" to spot.latitud,
+                "longitud" to spot.longitud,
+                "fotosUrls" to spot.fotosUrls,
+                "fechaCreacion" to spot.fechaCreacion, // Al actualizar, mantenemos la fecha original
+                "estado" to spot.estado,
+                "averageRating" to spot.averageRating,
+                "totalRatings" to spot.totalRatings
+            )
+            spotsCollection.document(id).set(spotData).await()
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -96,23 +113,18 @@ class SpotRepository(private val firestore: FirebaseFirestore) { // <-- ¡CAMBIO
     suspend fun getSpotsByIds(spotIds: List<String>): List<Spot> {
         if (spotIds.isEmpty()) return emptyList()
 
-        // Firestore solo permite hasta 30 elementos en una consulta `in`.
-        // Si esperas tener más, necesitarás dividirlo en lotes (chunks).
-        // Para el MVP y la mayoría de los casos, esto es suficiente.
-        val spotIdChunks = spotIds.chunked(30)
         val spotsList = mutableListOf<Spot>()
+        // Firestore permite hasta 30 valores en una cláusula 'in' desde actualizaciones recientes.
+        val chunks = spotIds.chunked(30)
 
         return try {
-            for (chunk in spotIdChunks) {
-                // --- ¡ESTA ES LA LÍNEA CLAVE A CAMBIAR! ---
-                // En lugar de buscar en un campo "spotId", buscamos en el ID del documento.
+            for (chunk in chunks) {
+                if (chunk.isEmpty()) continue
                 val snapshot = spotsCollection.whereIn(FieldPath.documentId(), chunk).get().await()
-
-                snapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Spot::class.java)?.also {
-                        // La anotación @DocumentId se encarga de esto, pero por seguridad no hace daño.
-                        it.spotId = doc.id
-                        spotsList.add(it)
+                for (doc in snapshot.documents) {
+                    doc.toObject<Spot>()?.let { spot ->
+                        spot.spotId = doc.id
+                        spotsList.add(spot)
                     }
                 }
             }

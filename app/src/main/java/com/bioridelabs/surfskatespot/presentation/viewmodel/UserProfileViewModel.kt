@@ -1,4 +1,3 @@
-// En: presentation/viewmodel/UserProfileViewModel.kt
 package com.bioridelabs.surfskatespot.presentation.viewmodel
 
 import android.net.Uri
@@ -47,9 +46,6 @@ class UserProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UserProfileState>(UserProfileState.Loading)
     val uiState: StateFlow<UserProfileState> = _uiState.asStateFlow()
 
-    // ... (El resto de tus funciones como init, uploadProfileImage, logout se quedan igual)
-
-    // Reemplazamos loadUserProfile con esta nueva lógica
     fun loadUserContributions() {
         viewModelScope.launch {
             _uiState.value = UserProfileState.Loading
@@ -61,10 +57,7 @@ class UserProfileViewModel @Inject constructor(
             }
 
             try {
-                // Obtenemos los datos del usuario y sus contribuciones en paralelo para más eficiencia
                 val userDeferred = async { userRepository.getUser(firebaseUser.uid) }
-
-                // 1. Obtener spots creados por el usuario
                 val createdSpotsDeferred = async {
                     firestore.collection("spots")
                         .whereEqualTo("userId", firebaseUser.uid)
@@ -72,27 +65,19 @@ class UserProfileViewModel @Inject constructor(
                         .toObjects(Spot::class.java)
                 }
 
-                // 2. Obtener valoraciones y comentarios (asumiendo que tienes estas colecciones)
-                // NOTA: Para el MVP, si aún no tienes valoraciones/comentarios, puedes omitir estas llamadas.
                 val valuationsDeferred = this.async {
-                    // Simulación, adapta a tu modelo de Valuation
-                    // firestore.collection("valuations").whereEqualTo("userId", firebaseUser.uid).get().await()
-                    emptyList<Valuation>() // Placeholder
+                    emptyList<Valuation>()
                 }
 
-                // Esperamos a que todas las llamadas terminen
+                // Espero a que todas las llamadas terminen
                 val user = userDeferred.await()
                 val createdSpots = createdSpotsDeferred.await()
                 val valuations = valuationsDeferred.await()
-
                 if (user == null) {
                     _uiState.value = UserProfileState.Error("No se pudieron encontrar los datos del usuario.")
                     return@launch
                 }
-
-                // Combinamos todo en una sola lista de contribuciones
                 val contributions = mutableListOf<UserContribution>()
-
                 createdSpots.forEach { spot ->
                     contributions.add(UserContribution.CreatedSpot(
                         spotId = spot.spotId!!,
@@ -100,12 +85,6 @@ class UserProfileViewModel @Inject constructor(
                         date = spot.fechaCreacion?.time ?: System.currentTimeMillis()
                     ))
                 }
-
-                // Aquí añadirías la lógica para mapear 'valuations' y 'comments' a UserContribution
-                // Ejemplo:
-                // valuations.forEach { valuation -> ... }
-
-                // Ordenamos las contribuciones por fecha, de más reciente a más antigua
                 contributions.sortByDescending { it.date }
 
                 _uiState.value = UserProfileState.LoggedIn(user, contributions)

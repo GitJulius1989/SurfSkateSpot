@@ -1,4 +1,3 @@
-// En: domain/repository/ImageStorageRepository.kt
 package com.bioridelabs.surfskatespot.domain.repository
 
 import android.net.Uri
@@ -57,8 +56,7 @@ class ImageStorageRepository @Inject constructor(
         }
     }
 
-    // Mantenemos este método por si lo usas en otro lado, pero para los spots
-    // ahora usaremos 'uploadImageBytes'
+
     suspend fun uploadImage(imageUri: Uri, userId: String): String? {
         return try {
             val imageFileName = "spots/${userId}/${UUID.randomUUID()}" // Ruta en Storage

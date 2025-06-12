@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/presentation/adapter/SpotAdapter.kt
 package com.bioridelabs.surfskatespot.presentation.adapter
 
 import android.view.LayoutInflater

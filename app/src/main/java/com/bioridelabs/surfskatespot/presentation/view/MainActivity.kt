@@ -1,16 +1,15 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/presentation/view/MainActivity.kt
 package com.bioridelabs.surfskatespot.presentation.view
 
-import android.content.Context // <-- ¡Añadir esta importación!
-import android.content.SharedPreferences // <-- ¡Añadir esta importación!
-import android.os.Build // <-- ¡Añadir esta importación!
+import android.content.Context
+import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate // <-- ¡Añadir esta importación!
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
-import androidx.core.os.LocaleListCompat // <-- ¡Añadir esta importación!
+import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat

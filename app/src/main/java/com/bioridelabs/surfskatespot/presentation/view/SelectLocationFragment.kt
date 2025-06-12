@@ -1,5 +1,3 @@
-// En /presentation/view/SelectLocationFragment.kt (Versión Definitiva)
-
 package com.bioridelabs.surfskatespot.presentation.view
 
 import android.os.Bundle

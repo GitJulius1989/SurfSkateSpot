@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/SSSApp.kt
 package com.bioridelabs.surfskatespot
 
 import android.app.Application

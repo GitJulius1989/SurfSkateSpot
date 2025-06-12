@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/domain/model/SportType.kt
 package com.bioridelabs.surfskatespot.domain.model
 
 import com.bioridelabs.surfskatespot.R

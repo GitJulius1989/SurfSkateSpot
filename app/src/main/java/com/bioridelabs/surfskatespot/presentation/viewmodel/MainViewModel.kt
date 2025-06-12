@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/presentation/viewmodel/MainViewModel.kt
 package com.bioridelabs.surfskatespot.presentation.viewmodel
 
 import androidx.lifecycle.LiveData

@@ -1,4 +1,3 @@
-// En: presentation/view/UserProfileFragment.kt
 package com.bioridelabs.surfskatespot.presentation.view
 
 import android.os.Bundle

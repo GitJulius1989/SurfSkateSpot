@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/utils/Extensions.kt
 package com.bioridelabs.surfskatespot.utils
 
 import android.text.Editable

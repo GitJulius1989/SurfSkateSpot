@@ -1,4 +1,3 @@
-// En: presentation/viewmodel/SpotDetailViewModel.kt
 package com.bioridelabs.surfskatespot.presentation.viewmodel
 
 import androidx.lifecycle.LiveData

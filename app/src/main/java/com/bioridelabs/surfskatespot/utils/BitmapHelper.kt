@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/utils/BitmapHelper.kt
 package com.bioridelabs.surfskatespot.utils
 
 import android.content.Context

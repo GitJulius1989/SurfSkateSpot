@@ -1,4 +1,3 @@
-// En una nueva carpeta "state" dentro de "presentation", o junto al ViewModel.
 package com.bioridelabs.surfskatespot.presentation.viewmodel.state
 
 import com.bioridelabs.surfskatespot.domain.model.Spot

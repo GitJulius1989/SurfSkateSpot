@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/utils/MyAppGlideModule.kt
 package com.bioridelabs.surfskatespot.utils
 
 import com.bumptech.glide.annotation.GlideModule

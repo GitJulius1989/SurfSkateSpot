@@ -1,4 +1,3 @@
-// app/src/main/java/com/bioridelabs/surfskatespot/presentation/view/AddSpotFragment.kt
 package com.bioridelabs.surfskatespot.presentation.view
 
 import android.Manifest
