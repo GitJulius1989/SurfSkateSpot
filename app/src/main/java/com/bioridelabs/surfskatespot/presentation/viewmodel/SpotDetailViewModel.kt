@@ -36,14 +36,12 @@ class SpotDetailViewModel @Inject constructor(
     private val _isFavorite = MutableLiveData<Boolean>()
     val isFavorite: LiveData<Boolean> = _isFavorite
 
-    // Este LiveData informará a la UI si el usuario actual es el dueño del Spot.
     private val _isOwner = MutableLiveData<Boolean>()
     val isOwner: LiveData<Boolean> = _isOwner
 
     private val _deleteResult = MutableLiveData<Result<Unit>>()
     val deleteResult: LiveData<Result<Unit>> = _deleteResult
 
-    // LiveData para el resultado de la valoración
     private val _addRatingResult = MutableLiveData<Result<Unit>>()
     val addRatingResult: LiveData<Result<Unit>> = _addRatingResult
 
@@ -57,7 +55,6 @@ class SpotDetailViewModel @Inject constructor(
                 _spotDetails.value = spot
                 spot?.let {
                     checkIfFavorite(it.spotId!!)
-                    // Comprobamos si el UID del usuario logueado coincide con el del creador del spot
                     _isOwner.value = (firebaseAuth.currentUser?.uid == it.userId)
                 } ?: run {
                     _isOwner.value = false
@@ -71,8 +68,6 @@ class SpotDetailViewModel @Inject constructor(
             }
         }
     }
-
-    // ... (El resto de métodos: checkIfFavorite, toggleFavorite, deleteSpot y clearErrorMessage se mantienen igual, ya son correctos)
 
     private fun checkIfFavorite(spotId: String) {
         val currentUserId = firebaseAuth.currentUser?.uid
@@ -103,10 +98,8 @@ class SpotDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // La nueva lógica: le decimos al repositorio cuál debe ser el nuevo estado.
                 val success = userRepository.toggleFavoriteSpot(currentUserId, spotId, !currentStatus)
                 if (success) {
-                    // Actualizamos nuestro LiveData interno, que notificará a la UI.
                     _isFavorite.value = !currentStatus
                 } else {
                     _errorMessage.value = "Error al actualizar favoritos."
@@ -126,12 +119,9 @@ class SpotDetailViewModel @Inject constructor(
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                // 1. Eliminar todas las imágenes asociadas de Firebase Storage
                 spotToDelete.fotosUrls.forEach { imageUrl ->
                     imageStorageRepository.deleteImage(imageUrl)
                 }
-
-                // 2. Eliminar el documento del spot de Firestore
                 val success = spotRepository.deleteSpot(spotId)
 
                 if (success) {

@@ -142,14 +142,19 @@ class AddSpotFragment : Fragment() {
         }
 
         // Chip listeners
-        binding.chipGroupSportType.setOnCheckedChangeListener { _, checkedId ->
-            val sportType = when (checkedId) {
-                R.id.chipSurf -> SportType.SURF
-                R.id.chipSurfskate -> SportType.SURFSKATE
-                R.id.chipSkatepark -> SportType.SKATEPARK
-                else -> null
+        binding.chipGroupSportType.setOnCheckedStateChangeListener { group, checkedIds ->
+            // Como es singleSelection, solo nos interesa el primer (y único) ID.
+            if (checkedIds.isNotEmpty()) {
+                val sportType = when (checkedIds.first()) {
+                    R.id.chipSurf -> SportType.SURF
+                    R.id.chipSurfskate -> SportType.SURFSKATE
+                    R.id.chipSkatepark -> SportType.SKATEPARK
+                    // No necesitamos un `else` porque selectionRequired=true
+                    else -> return@setOnCheckedStateChangeListener
+                }
+                // ¡Simple! Solo notificamos la acción del usuario.
+                addSpotViewModel.onSportTypeSelected(sportType)
             }
-            addSpotViewModel.onSportTypeSelected(sportType)
         }
 
         binding.btnSelectLocation.setOnClickListener {

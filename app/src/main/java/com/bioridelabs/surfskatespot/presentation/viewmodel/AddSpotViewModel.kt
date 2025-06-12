@@ -1,5 +1,6 @@
 package com.bioridelabs.surfskatespot.presentation.viewmodel
 
+import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +10,7 @@ import com.bioridelabs.surfskatespot.domain.model.SportType
 import com.bioridelabs.surfskatespot.domain.model.Spot
 import com.bioridelabs.surfskatespot.domain.repository.ImageStorageRepository
 import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
-import com.bioridelabs.surfskatespot.utils.ImageOptimizer
+import com.bioridelabs.surfskatespot.utils.BitmapHelper
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -17,25 +18,24 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AddSpotViewModel @Inject constructor(
+    private val application: Application,
     private val spotRepository: SpotRepository,
     private val imageStorageRepository: ImageStorageRepository,
-    private val imageOptimizer: ImageOptimizer, // ¡Inyectamos el optimizador!
     private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
-    // ... (El resto de tus LiveData y StateFlows se mantienen igual)
     private val _spotName = MutableStateFlow("")
     val spotName: StateFlow<String> = _spotName.asStateFlow()
 
     private val _spotDescription = MutableStateFlow("")
     val spotDescription: StateFlow<String> = _spotDescription.asStateFlow()
-
-    private var selectedSportType: SportType? = null
 
     private val _selectedLocation = MutableLiveData<Pair<Double, Double>?>() // Latitud, Longitud
     val selectedLocation: LiveData<Pair<Double, Double>?> = _selectedLocation
@@ -54,17 +54,16 @@ class AddSpotViewModel @Inject constructor(
 
     private var spotIdForUpdate: String? = null // Para saber si estamos editando o creando
 
-    private var existingPhotoUrls: List<String> = emptyList()
-
     private var spotIdToEdit: String? = null
 
-    private val _selectedSportType = MutableLiveData<SportType?>(null)
+    // El estado ya no puede ser inválido. SportType.SURF será la opción por defecto.
+    private val _selectedSportType = MutableStateFlow<SportType>(SportType.SURF)
+    val selectedSportType: StateFlow<SportType> = _selectedSportType.asStateFlow()
+
+    private var existingPhotoUrls: List<String> = emptyList()
 
 
 
-
-
-    // ... (El resto de tus métodos 'on...Changed' y 'add/remove PhotoUri' se mantienen igual)
     fun onSpotNameChanged(name: String) {
         _spotName.value = name
     }
@@ -73,9 +72,10 @@ class AddSpotViewModel @Inject constructor(
         _spotDescription.value = description
     }
 
-    fun onSportTypeSelected(sportType: SportType?) {
-        selectedSportType = sportType
+    fun onSportTypeSelected(sportType: SportType) {
+        _selectedSportType.value = sportType
     }
+
 
     fun onLocationSelected(latitude: Double, longitude: Double) {
         _selectedLocation.value = Pair(latitude, longitude)
@@ -102,7 +102,7 @@ class AddSpotViewModel @Inject constructor(
 
         val name = _spotName.value.trim()
         val description = _spotDescription.value.trim()
-        val sportType = selectedSportType
+        val sportType = _selectedSportType.value
         val location = _selectedLocation.value
         val photoUris = _selectedPhotoUris.value ?: emptyList()
         val userId = firebaseAuth.currentUser?.uid
@@ -113,7 +113,7 @@ class AddSpotViewModel @Inject constructor(
             _isLoading.value = false
             return
         }
-        if (name.isBlank() || description.isBlank() || sportType == null || location == null) {
+        if (name.isBlank() || description.isBlank() || location == null) {
             _errorMessage.value = "Por favor, completa todos los campos requeridos."
             _isLoading.value = false
             return
@@ -126,9 +126,31 @@ class AddSpotViewModel @Inject constructor(
                 val newPhotoUris = photoUris.filter { it.scheme != "https" }
                 val remainingOldUrls = photoUris.filter { it.scheme == "https" }.map { it.toString() }
 
-                // Subimos solo las imágenes nuevas
+//                // Subimos solo las imágenes nuevas
+//                val newUploadedUrls = newPhotoUris.map { uri ->
+//                    async { imageStorageRepository.uploadImage(uri, userId) }
+//                }.awaitAll().filterNotNull()
+
+                // Subimos solo las imágenes nuevas, COMPRIMIÉNDOLAS
                 val newUploadedUrls = newPhotoUris.map { uri ->
-                    async { imageStorageRepository.uploadImage(uri, userId) }
+                    async {
+                        // Comprimir la imagen en un hilo de IO
+                        val compressedBytes = withContext(Dispatchers.IO) {
+                            BitmapHelper.compressImageToByteArray(
+                                application, // Usar el contexto de la aplicación
+                                uri,
+                                quality = 75,
+                                maxWidth = 1280,
+                                maxHeight = 1280
+                            )
+                        }
+                        if (compressedBytes != null) {
+                            imageStorageRepository.uploadImageBytes(compressedBytes, userId)
+                        } else {
+                            // Manejar el error de compresión, posiblemente relanzando una excepción
+                            throw Exception("Fallo al comprimir la imagen: $uri")
+                        }
+                    }
                 }.awaitAll().filterNotNull()
 
                 // Combinamos las URLs de las fotos antiguas que no se eliminaron con las nuevas
@@ -184,12 +206,9 @@ class AddSpotViewModel @Inject constructor(
                     // Para el tipo de deporte, asumimos que por ahora solo hay uno.
                     // Si tuvieras varios, aquí necesitarías una lógica más compleja.
                     val sportTypeString = spot.tiposDeporte.firstOrNull()
-                    _selectedSportType.value = sportTypeString?.let { SportType.fromType(it) }
-
-                    // Para las fotos, esto es más complejo. Las URLs son de Firebase Storage,
-                    // no Uris locales. Para edición, podrías mostrarlas y permitir borrarlas,
-                    // pero no puedes añadirlas directamente a _selectedPhotoUris.
-                    // Para el MVP, podríamos empezar por no permitir editar las fotos.
+                    _selectedSportType.value = sportTypeString?.let { SportType.fromType(it) } ?: SportType.SURF
+                    _selectedPhotoUris.value = spot.fotosUrls.map { Uri.parse(it) }.toMutableList() // Convierte URLs a Uris para mostrar en el RV
+                    existingPhotoUrls = spot.fotosUrls
                 } else {
                     _errorMessage.value = "No se pudo encontrar el spot para editar."
                 }

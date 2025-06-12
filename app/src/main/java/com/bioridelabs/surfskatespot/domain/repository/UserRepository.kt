@@ -8,7 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class UserRepository @Inject constructor( // <--- ¡Añade @Inject aquí!
+class UserRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) {
@@ -131,17 +131,16 @@ class UserRepository @Inject constructor( // <--- ¡Añade @Inject aquí!
         firestore.runTransaction { transaction ->
             val snapshot = transaction.get(userDocRef)
             if (!snapshot.exists()) {
-                // El usuario no existe en Firestore, así que lo creamos.
+                // Si el usuario no existe en Firestore, lo creo.
                 val newUser = User(
                     userId = firebaseUser.uid,
                     nombre = firebaseUser.displayName ?: "Sin Nombre",
                     email = firebaseUser.email ?: "",
                     fotoPerfilUrl = firebaseUser.photoUrl?.toString()
-                    // 'favoritos' y 'fechaRegistro' ya tienen valores por defecto en el data class.
                 )
                 transaction.set(userDocRef, newUser)
             }
-            // Si el snapshot.exists() es true, no hacemos nada. El usuario ya estaba registrado.
+            // Si snapshot.exists() es true, no hago nada. El usuario ya consta en la bbdd
         }.await()
     }
 }

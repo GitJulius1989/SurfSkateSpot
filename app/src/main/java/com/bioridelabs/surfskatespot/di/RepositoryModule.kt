@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth // Importa FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 
+// Clase para proveer dependencias relacionadas con Firebase y repositorios.
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {

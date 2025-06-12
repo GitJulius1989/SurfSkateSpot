@@ -10,35 +10,34 @@ import com.bioridelabs.surfskatespot.domain.model.Valuation
 import com.bioridelabs.surfskatespot.domain.repository.ImageStorageRepository
 import com.bioridelabs.surfskatespot.domain.repository.SpotRepository
 import com.bioridelabs.surfskatespot.domain.repository.UserRepository
-import com.bioridelabs.surfskatespot.presentation.viewmodel.state.UserProfileState
+import android.app.Application
+import com.bioridelabs.surfskatespot.utils.BitmapHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
-// NOTA: Necesitaremos un StorageRepository. Lo crearemos en el siguiente paso.
-// Por ahora, lo comentamos para que el código compile.
-// import com.bioridelabs.surfskatespot.domain.repository.StorageRepository
 
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
+    private val application: Application,
     private val auth: FirebaseAuth,
     private val userRepository: UserRepository,
     private val spotRepository: SpotRepository,
     private val storageRepository: ImageStorageRepository,
-    private val firestore: FirebaseFirestore // Inyectamos Firestore para consultas específicas
+    private val firestore: FirebaseFirestore
 ) : ViewModel() {
 
-    // Cambiamos el estado para que acepte UserContribution
     sealed class UserProfileState {
         object Loading : UserProfileState()
-        data class LoggedIn(val user: User, val contributions: List<UserContribution>) : UserProfileState() // <-- Cambio aquí
+        data class LoggedIn(val user: User, val contributions: List<UserContribution>) : UserProfileState()
         object LoggedOut : UserProfileState()
         data class Error(val message: String) : UserProfileState()
     }
@@ -96,14 +95,29 @@ class UserProfileViewModel @Inject constructor(
     }
 
 
-    // Los métodos que no encontraba el Fragment:
     fun uploadProfileImage(imageUri: Uri) {
         viewModelScope.launch {
             val userId = auth.currentUser?.uid ?: return@launch
             try {
-                val imageUrl = storageRepository.uploadProfileImage(userId, imageUri)
+                // COMPRESIÓN DE LA IMAGEN ANTES DE SUBIRLA
+                val compressedBytes = withContext(Dispatchers.IO) {
+                    BitmapHelper.compressImageToByteArray(
+                        application, // Usar el contexto de la aplicación
+                        imageUri,
+                        quality = 85, // Ajustar calidad para perfil
+                        maxWidth = 512, // Ajustar dimensiones para perfil
+                        maxHeight = 512
+                    )
+                }
+
+                if (compressedBytes == null) {
+                    _uiState.value = UserProfileState.Error("Error al comprimir la imagen de perfil.")
+                    return@launch
+                }
+
+                val imageUrl = storageRepository.uploadProfileImageBytes(compressedBytes, userId) // Llama al método que sube bytes
                 userRepository.updateUser(userId, mapOf("fotoPerfilUrl" to imageUrl))
-                loadUserContributions() // Recargar el perfil
+                loadUserContributions()
             } catch (e: Exception) {
                 _uiState.value = UserProfileState.Error("Error al subir la imagen: ${e.message}")
             }

@@ -1,5 +1,6 @@
 package com.bioridelabs.surfskatespot.domain.model
 
+// Clase sellada para representar contribuciones de usuario a la comunidad. Nutre el recycler de profileFragment
 sealed class UserContribution {
     abstract val spotId: String
     abstract val spotName: String

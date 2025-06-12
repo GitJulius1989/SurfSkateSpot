@@ -13,11 +13,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-// Anota LoginViewModel con @HiltViewModel y modifica el constructor
-@HiltViewModel // <--- Añade esta anotación
-class LoginViewModel @Inject constructor( // <--- Añade @Inject y el parámetro
-    val userRepository: UserRepository, // <--- Inyecta UserRepository
-    private val firebaseAuth: FirebaseAuth // <--- También inyecta FirebaseAuth directamente aquí para Google Sign-In
+
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    val userRepository: UserRepository,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     // LiveData para comunicar el resultado del login (email/password) a la vista

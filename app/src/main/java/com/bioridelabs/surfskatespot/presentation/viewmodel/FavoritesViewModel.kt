@@ -15,8 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val spotRepository: SpotRepository,
-    private val userRepository: UserRepository, // Inyectamos UserRepository
-    private val firebaseAuth: FirebaseAuth      // Inyectamos FirebaseAuth
+    private val userRepository: UserRepository,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     private val _favoriteSpots = MutableLiveData<List<Spot>>()
@@ -47,7 +47,7 @@ class FavoritesViewModel @Inject constructor(
             try {
                 val user = userRepository.getUser(currentUserId)
                 if (user != null && user.favoritos.isNotEmpty()) {
-                    val spots = spotRepository.getSpotsByIds(user.favoritos) // Nuevo método en SpotRepository
+                    val spots = spotRepository.getSpotsByIds(user.favoritos)
                     _favoriteSpots.value = spots
                 } else {
                     _favoriteSpots.value = emptyList() // No hay favoritos o usuario no encontrado

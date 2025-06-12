@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" /> <!-- Compatibilidad con versiones 14+ para control granular de acceso multimedia -->
 
     <application
         android:name=".SSSApp"
@@ -35,7 +36,7 @@
         </activity>
         <activity
             android:name=".presentation.view.MainActivity"
-            android:exported="false"> </activity>
-
+            android:exported="false">
+        </activity>
     </application>
 </manifest>

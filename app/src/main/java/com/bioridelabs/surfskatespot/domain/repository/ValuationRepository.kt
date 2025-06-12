@@ -33,11 +33,11 @@ class ValuationRepository @Inject constructor(
                 // Fórmula para calcular la nueva media sin tener que sumar todas las notas anteriores
                 val newAverageRating = (oldAverageRating * oldTotalRatings + valuation.nota) / newTotalRatings
 
-                // 1. Añadir la nueva valoración a la colección 'valuations'
+                // Añado la nueva valoración a la colección 'valuations'
                 val newValuationRef = valuationsCollection.document()
                 transaction.set(newValuationRef, valuation)
 
-                // 2. Actualizar el spot con la nueva media y el nuevo total de valoraciones
+                // Actualizo el spot con la nueva media y el nuevo total de valoraciones
                 transaction.update(
                     spotRef,
                     "averageRating", newAverageRating,

@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class SpotRepository(private val firestore: FirebaseFirestore) {
 
-    private val spotsCollection = firestore.collection("spots") // Ahora usa la instancia inyectada
+    private val spotsCollection = firestore.collection("spots")
 
     // Obtener todos los spots
     suspend fun getAllSpots(): List<Spot> {
@@ -38,7 +38,7 @@ class SpotRepository(private val firestore: FirebaseFirestore) {
                 "latitud" to spot.latitud,
                 "longitud" to spot.longitud,
                 "fotosUrls" to spot.fotosUrls,
-                "fechaCreacion" to com.google.firebase.firestore.FieldValue.serverTimestamp(), // Mejor forma de usar Timestamps
+                "fechaCreacion" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
                 "estado" to spot.estado,
                 "averageRating" to spot.averageRating,
                 "totalRatings" to spot.totalRatings
@@ -54,7 +54,7 @@ class SpotRepository(private val firestore: FirebaseFirestore) {
     suspend fun updateSpot(spot: Spot): Boolean {
         return try {
             val id = spot.spotId ?: return false
-            // Reutilizamos la misma lógica de mapa para asegurar consistencia
+            // Reutilizo la misma lógica de mapa para asegurar consistencia
             val spotData = mapOf(
                 "userId" to spot.userId,
                 "nombre" to spot.nombre,

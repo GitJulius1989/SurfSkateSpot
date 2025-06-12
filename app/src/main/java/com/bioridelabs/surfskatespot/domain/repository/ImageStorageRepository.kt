@@ -7,10 +7,10 @@ import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import javax.inject.Inject
 
+// Clase para subir y gestionar imágenes en Firebase Storage.
 class ImageStorageRepository @Inject constructor(
     private val firebaseStorage: FirebaseStorage
 ) {
-
     private val storageRef: StorageReference = firebaseStorage.reference
 
     /**
@@ -30,7 +30,6 @@ class ImageStorageRepository @Inject constructor(
 
     /**
      * Sube una imagen de perfil a Firebase Storage.
-     * (Asumimos que la imagen de perfil también se optimiza antes de llegar aquí)
      * @param imageData Los datos de la imagen como ByteArray.
      * @param userId El UID del usuario.
      * @return La URL de descarga de la imagen.

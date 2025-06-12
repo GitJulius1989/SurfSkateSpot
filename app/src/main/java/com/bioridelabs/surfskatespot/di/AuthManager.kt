@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// Clase para gestionar la autenticación de Firebase para gestionar el modo invitado de la app
 @Singleton
 class AuthManager @Inject constructor(
     private val firebaseAuth: FirebaseAuth
